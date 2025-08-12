@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Mona Piqueteadero</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">La Mona</div>
+        <h1 class="logo-main">Piqueteadero</h1>
+        <p class="tagline">El mejor sabor en combos y porciones</p>
+        <a href="#productos" class="btn-ordena">Ordena Ya</a>
+    </header>
+
+    <!-- Contact Section -->
+    <section class="contact-section">
+        <h2 class="contact-title">Contáctanos 😋</h2>
+        <div class="contact-icons">
+            <a href="tel:+573000001234" class="contact-icon phone">
+                📞
+                <span class="contact-label">Llámanos</span>
+            </a>
+            <a href="https://wa.me/573000001234" class="contact-icon">
+                💬
+                <span class="contact-label">WhatsApp</span>
+            </a>
+            <a href="#" class="contact-icon receipt">
+                🧾
+                <span class="contact-label">Llámanos</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-image">🎉</div>
+                <h3 class="feature-title">Reserva y Celebra</h3>
+                <p class="feature-description">Tenemos todo planeado para el mejor día de las sus queridos con la mejor comida y compañía.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-image">🍽️</div>
+                <h3 class="feature-title">Servimos en Grande</h3>
+                <p class="feature-description">Nos gusta satisfacer el apetito para aquellos que les encanta la comida Colombiana.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-image">💳</div>
+                <h3 class="feature-title">Facilidad de Pago</h3>
+                <p class="feature-description">Recibe el domicilio y paga por el medio que prefieras, efectivo o transferencia.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section" id="productos">
+        <h2 class="section-title">Nuestros Productos</h2>
+        <div class="products-grid">
+            <div class="product-card">
+                <h3 class="product-name">Salchipapa Especial</h3>
+                <div class="product-price">$12.000 COP</div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
+                    <span class="quantity-display">0</span>
+                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                </div>
+                <button class="add-to-cart" onclick="addToCart('Salchipapa Especial', 12000, this)">Agregar al Carrito</button>
+            </div>
+
+            <div class="product-card">
+                <h3 class="product-name">Hamburguesa La Mona</h3>
+                <div class="product-price">$15.000 COP</div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
+                    <span class="quantity-display">0</span>
+                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                </div>
+                <button class="add-to-cart" onclick="addToCart('Hamburguesa La Mona', 15000, this)">Agregar al Carrito</button>
+            </div>
+
+            <div class="product-card">
+                <h3 class="product-name">Combo Familiar</h3>
+                <div class="product-price">$35.000 COP</div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
+                    <span class="quantity-display">0</span>
+                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                </div>
+                <button class="add-to-cart" onclick="addToCart('Combo Familiar', 35000, this)">Agregar al Carrito</button>
+            </div>
+
+            <div class="product-card">
+                <h3 class="product-name">Alitas BBQ</h3>
+                <div class="product-price">$18.000 COP</div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
+                    <span class="quantity-display">0</span>
+                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                </div>
+                <button class="add-to-cart" onclick="addToCart('Alitas BBQ', 18000, this)">Agregar al Carrito</button>
+            </div>
+
+            <div class="product-card">
+                <h3 class="product-name">Perro Caliente Especial</h3>
+                <div class="product-price">$10.000 COP</div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
+                    <span class="quantity-display">0</span>
+                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                </div>
+                <button class="add-to-cart" onclick="addToCart('Perro Caliente Especial', 10000, this)">Agregar al Carrito</button>
+            </div>
+
+            <div class="product-card">
+                <h3 class="product-name">Combo Pareja</h3>
+                <div class="product-price">$25.000 COP</div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
+                    <span class="quantity-display">0</span>
+                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                </div>
+                <button class="add-to-cart" onclick="addToCart('Combo Pareja', 25000, this)">Agregar al Carrito</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cart Badge -->
+    <div class="cart-badge empty" id="cartBadge" onclick="scrollToCart()">0</div>
+
+    <!-- Cart Section -->
+    <section class="cart-section" id="cartSection" style="display: none;">
+        <div class="cart-container">
+            <h2 class="cart-title">🛒 Tu Pedido</h2>
+            <div class="cart-items" id="cartItems"></div>
+            <div class="cart-total" id="cartTotal" style="display: none;">
+                Total: $0 COP
+            </div>
+            <div class="customer-info" id="customerInfo" style="display: none;">
+                <div class="form-group">
+                    <label for="customerName">Nombre Completo:</label>
+                    <input type="text" id="customerName" placeholder="Tu nombre completo">
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone">Teléfono:</label>
+                    <input type="tel" id="customerPhone" placeholder="Tu número de teléfono">
+                </div>
+                <div class="form-group">
+                    <label for="customerAddress">Dirección (opcional):</label>
+                    <input type="text" id="customerAddress" placeholder="Para entrega a domicilio">
+                </div>
+                <div class="form-group">
+                    <label for="customerNotes">Notas especiales:</label>
+                    <input type="text" id="customerNotes" placeholder="Alguna petición especial">
+                </div>
+            </div>
+            <button class="send-order" id="sendOrder" onclick="sendOrder()" style="display: none;">
+                📱 Enviar Pedido por WhatsApp
+            </button>
+        </div>
+    </section>
+
+    <!-- Delivery Section -->
+    <section class="delivery-section">
+        <div class="delivery-container">
+            <div class="delivery-icon">🛵</div>
+            <div class="delivery-content">
+                <h2 class="delivery-title">Entregamos a Domicilio</h2>
+                <p class="delivery-description">Solo Cúcuriano lo que más pides, literal. Cero recargados. Por qué somos los mejores y entrega cáliente tu pedido para que disfrutes.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-contacts">
+            <a href="https://wa.me/573000001234" class="footer-contact">💬 WhatsApp</a>
+            <a href="tel:+573000001234" class="footer-contact">📞 Llámanos</a>
+            <a href="#" class="footer-contact">📋 Llámanos</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
