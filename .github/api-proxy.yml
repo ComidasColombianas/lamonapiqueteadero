@@ -1,0 +1,84 @@
+name: API Proxy for Orders
+on:
+  # Se activa cuando recibe un webhook desde tu página web
+  repository_dispatch:
+    types: [process_order]
+
+jobs:
+  process-order:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Validate Order Data
+        id: validate
+        run: |
+          echo "🔍 Validando datos del pedido..."
+          
+          # Obtener datos del webhook
+          order_data='${{ toJson(github.event.client_payload) }}'
+          echo "Datos recibidos: $order_data"
+          
+          # Validaciones básicas (puedes expandir)
+          if [[ -z "${{ github.event.client_payload.cliente_nombre }}" ]]; then
+            echo "❌ Error: Nombre requerido"
+            exit 1
+          fi
+          
+          if [[ -z "${{ github.event.client_payload.cliente_email }}" ]]; then
+            echo "❌ Error: Email requerido"
+            exit 1
+          fi
+          
+          echo "✅ Validaciones pasadas"
+          
+      - name: Forward to N8N
+        run: |
+          echo "📤 Enviando a N8N..."
+          
+          # Construir JSON para n8n
+          order_json=$(cat << 'EOF'
+          {
+            "cliente_nombre": "${{ github.event.client_payload.cliente_nombre }}",
+            "cliente_telefono": "${{ github.event.client_payload.cliente_telefono }}",
+            "cliente_email": "${{ github.event.client_payload.cliente_email }}",
+            "cliente_direccion": "${{ github.event.client_payload.cliente_direccion }}",
+            "items": ${{ toJson(github.event.client_payload.items) }},
+            "notas": "${{ github.event.client_payload.notas }}",
+            "procesado_por": "GitHub-Action-Proxy",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+          )
+          
+          # Enviar a n8n
+          response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: LaMonaGitHubProxy/1.0" \
+            -d "$order_json" \
+            "${{ secrets.N8N_WEBHOOK_URL }}")
+          
+          # Separar respuesta y código HTTP
+          body=$(echo $response | sed -E 's/HTTPSTATUS\:[0-9]{3}$//')
+          status=$(echo $response | tr -d '\n' | sed -E 's/.*HTTPSTATUS:([0-9]{3})$/\1/')
+          
+          echo "Status: $status"
+          echo "Response: $body"
+          
+          if [[ $status -eq 200 ]] || [[ $status -eq 201 ]]; then
+            echo "✅ Pedido enviado exitosamente a n8n"
+          else
+            echo "❌ Error enviando a n8n: Status $status"
+            exit 1
+          fi
+          
+      - name: Log Success
+        if: success()
+        run: |
+          echo "🎉 Pedido procesado exitosamente"
+          echo "Cliente: ${{ github.event.client_payload.cliente_nombre }}"
+          echo "Email: ${{ github.event.client_payload.cliente_email }}"
+          echo "Timestamp: $(date)"
