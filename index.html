@@ -139,26 +139,31 @@
             <div class="cart-total" id="cartTotal" style="display: none;">
                 Total: $0 COP
             </div>
+            <!-- Reemplaza la sección customer-info en tu HTML -->
             <div class="customer-info" id="customerInfo" style="display: none;">
                 <div class="form-group">
-                    <label for="customerName">Nombre Completo:</label>
-                    <input type="text" id="customerName" placeholder="Tu nombre completo">
+                    <label for="customerName">Nombre Completo: *</label>
+                    <input type="text" id="customerName" placeholder="Tu nombre completo" required>
                 </div>
                 <div class="form-group">
-                    <label for="customerPhone">Teléfono:</label>
-                    <input type="tel" id="customerPhone" placeholder="Tu número de teléfono">
+                    <label for="customerPhone">Teléfono: *</label>
+                    <input type="tel" id="customerPhone" placeholder="Ej: 3001234567" required>
                 </div>
                 <div class="form-group">
-                    <label for="customerAddress">Dirección (opcional):</label>
-                    <input type="text" id="customerAddress" placeholder="Para entrega a domicilio">
+                    <label for="customerEmail">Correo Electrónico: *</label>
+                    <input type="email" id="customerEmail" placeholder="tu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerAddress">Dirección: *</label>
+                    <input type="text" id="customerAddress" placeholder="Dirección de entrega" required>
                 </div>
                 <div class="form-group">
                     <label for="customerNotes">Notas especiales:</label>
                     <input type="text" id="customerNotes" placeholder="Alguna petición especial">
                 </div>
             </div>
-            <button class="send-order" id="sendOrder" onclick="sendOrder()" style="display: none;">
-                📱 Enviar Pedido por WhatsApp
+            <button class="pay-button" id="payButton" onclick="showPaymentModal()" style="display: none;">
+                💳 PAGAR
             </button>
         </div>
     </section>

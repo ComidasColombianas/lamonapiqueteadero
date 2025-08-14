@@ -1,9 +1,36 @@
-// Configuración del webhook de n8n
-// ⚠️ IMPORTANTE: Reemplaza esta URL con tu webhook real de n8n
-const WEBHOOK_URL = 'https://comidagourmet92302.app.n8n.cloud/webhook/recibir-pedido';
+// 🔒 CONFIGURACIÓN GITHUB ACTION PROXY
+const GITHUB_CONFIG = {
+    owner: 'comidascolombianas',
+    repo: 'comidascolombianas.github.io'
+};
 
+// URL para disparar el GitHub Action
+const GITHUB_PROXY_URL = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/dispatches`;
+
+// Función para hacer pedidos a través del proxy
+async function hacerPedido(datosPedido) {
+    try {
+        const response = await fetch(GITHUB_PROXY_URL, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                // ❌ NO pongas Authorization aquí
+            },
+            body: JSON.stringify({
+                event_type: 'pedido_comida',
+                client_payload: datosPedido
+            })
+        });
+        
+        return response.ok;
+    } catch (error) {
+        console.error('Error:', error);
+        return false;
+    }
+}
 // Variables globales
 let cart = [];
+const WHATSAPP_NUMBER = '573213700248';
 
 // Funciones principales
 function updateQuantity(button, change) {
@@ -22,15 +49,12 @@ function addToCart(productName, price, button) {
         return;
     }
 
-    // Verificar si el producto ya existe en el carrito
     const existingItemIndex = cart.findIndex(item => item.producto === productName);
     
     if (existingItemIndex > -1) {
-        // Si existe, sumar la cantidad
         cart[existingItemIndex].cantidad += quantity;
         cart[existingItemIndex].total = cart[existingItemIndex].cantidad * cart[existingItemIndex].precio;
     } else {
-        // Si no existe, agregarlo al carrito
         cart.push({
             producto: productName,
             cantidad: quantity,
@@ -39,13 +63,10 @@ function addToCart(productName, price, button) {
         });
     }
 
-    // Resetear la cantidad mostrada
     quantityElement.textContent = '0';
-    
-    // Actualizar la visualización del carrito
     updateCartDisplay();
     
-    // Mostrar mensaje de éxito
+    // Feedback visual mejorado
     button.textContent = '✅ Agregado';
     button.style.background = '#28a745';
     setTimeout(() => {
@@ -59,44 +80,43 @@ function updateCartDisplay() {
     const cartTotal = document.getElementById('cartTotal');
     const cartBadge = document.getElementById('cartBadge');
     const customerInfo = document.getElementById('customerInfo');
-    const sendOrderBtn = document.getElementById('sendOrder');
+    const payBtn = document.getElementById('payButton');
     const cartSection = document.getElementById('cartSection');
     
     if (cart.length === 0) {
-        // Ocultar toda la sección del carrito
         cartSection.style.display = 'none';
         cartBadge.classList.add('empty');
         cartBadge.textContent = '0';
-    } else {
-        // Mostrar la sección del carrito
-        cartSection.style.display = 'block';
-        
-        let cartHTML = '';
-        let total = 0;
-        let totalItems = 0;
-
-        cart.forEach((item, index) => {
-            cartHTML += `
-                <div class="cart-item">
-                    <div class="cart-item-info">
-                        <div class="cart-item-name">${item.cantidad}x ${item.producto}</div>
-                        <div class="cart-item-price">$${item.total.toLocaleString()} COP</div>
-                    </div>
-                    <button onclick="removeFromCart(${index})" style="background: #dc3545; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">×</button>
-                </div>
-            `;
-            total += item.total;
-            totalItems += item.cantidad;
-        });
-
-        cartItems.innerHTML = cartHTML;
-        cartTotal.innerHTML = `Total: ${total.toLocaleString()} COP`;
-        cartTotal.style.display = 'block';
-        customerInfo.style.display = 'grid';
-        sendOrderBtn.style.display = 'block';
-        cartBadge.classList.remove('empty');
-        cartBadge.textContent = totalItems;
+        return;
     }
+
+    cartSection.style.display = 'block';
+    
+    let cartHTML = '';
+    let total = 0;
+    let totalItems = 0;
+
+    cart.forEach((item, index) => {
+        cartHTML += `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.cantidad}x ${item.producto}</div>
+                    <div class="cart-item-price">$${item.total.toLocaleString()} COP</div>
+                </div>
+                <button onclick="removeFromCart(${index})" style="background: #dc3545; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">×</button>
+            </div>
+        `;
+        total += item.total;
+        totalItems += item.cantidad;
+    });
+
+    cartItems.innerHTML = cartHTML;
+    cartTotal.innerHTML = `Total: $${total.toLocaleString()} COP`;
+    cartTotal.style.display = 'block';
+    customerInfo.style.display = 'grid';
+    payBtn.style.display = 'block';
+    cartBadge.classList.remove('empty');
+    cartBadge.textContent = totalItems;
 }
 
 function removeFromCart(index) {
@@ -106,63 +126,70 @@ function removeFromCart(index) {
 
 function scrollToCart() {
     if (cart.length > 0) {
-        document.querySelector('.cart-section').scrollIntoView({ 
-            behavior: 'smooth' 
-        });
+        document.querySelector('.cart-section').scrollIntoView({ behavior: 'smooth' });
     } else {
-        // Si no hay productos en el carrito, hacer scroll a los productos
-        document.querySelector('.products-section').scrollIntoView({ 
-            behavior: 'smooth' 
-        });
+        document.querySelector('.products-section').scrollIntoView({ behavior: 'smooth' });
     }
 }
 
-function sendOrder() {
-    // Validar que hay productos en el carrito
+// Nueva función: Mostrar modal de confirmación
+function showPaymentModal() {
     if (cart.length === 0) {
-        alert('🛒 Tu carrito está vacío\n\nAgrega algunos productos antes de enviar tu pedido.');
+        alert('🛒 Tu carrito está vacío\n\nAgrega algunos productos antes de continuar.');
         return;
     }
 
-    // Obtener información del cliente
+    if (!validateCustomerInfo()) {
+        return;
+    }
+
+    const total = cart.reduce((sum, item) => sum + item.total, 0);
+    const customerName = document.getElementById('customerName').value.trim();
+    
+    const modal = document.createElement('div');
+    modal.className = 'payment-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>🍽️ Confirmar Pedido</h3>
+            <p><strong>${customerName}</strong>, se redireccionará a WhatsApp para:</p>
+            <ul>
+                <li>📄 Resumen de tu pedido</li>
+                <li>💳 Link de pago seguro</li>
+                <li>📧 Confirmación por email</li>
+            </ul>
+            <p><strong>Total: $${total.toLocaleString()} COP</strong></p>
+            <div class="modal-buttons">
+                <button onclick="closeModal()" class="btn-cancel">Cancelar</button>
+                <button onclick="processPayment()" class="btn-confirm">Enviar y Pagar</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function closeModal() {
+    const modal = document.querySelector('.payment-modal');
+    if (modal) modal.remove();
+}
+
+// Función principal de pago actualizada
+function processPayment() {
+    closeModal();
+
     const customerName = document.getElementById('customerName').value.trim();
     const customerPhone = document.getElementById('customerPhone').value.trim();
-    const customerEmail = document.getElementById('customerEmail') ? document.getElementById('customerEmail').value.trim() : '';
+    const customerEmail = document.getElementById('customerEmail').value.trim();
     const customerAddress = document.getElementById('customerAddress').value.trim();
     const customerNotes = document.getElementById('customerNotes').value.trim();
 
-    // Validaciones básicas del lado del cliente
-    if (!customerName) {
-        alert('📝 Por favor ingresa tu nombre completo');
-        document.getElementById('customerName').focus();
-        return;
-    }
-
-    if (!customerPhone) {
-        alert('📱 Por favor ingresa tu número de teléfono');
-        document.getElementById('customerPhone').focus();
-        return;
-    }
-
-    // Validación básica de teléfono colombiano
-    const phoneRegex = /^(\+57|57)?[3][0-9]{9}$/;
-    if (!phoneRegex.test(customerPhone.replace(/\s/g, ''))) {
-        const confirmPhone = confirm('⚠️ El número de teléfono puede no ser válido para Colombia.\n\n¿Deseas continuar de todas formas?');
-        if (!confirmPhone) {
-            document.getElementById('customerPhone').focus();
-            return;
-        }
-    }
-
-    // Calcular total
     const total = cart.reduce((sum, item) => sum + item.total, 0);
 
-    // Preparar datos para n8n - FORMATO ACTUALIZADO
     const orderData = {
         cliente_nombre: customerName,
         cliente_telefono: customerPhone,
-        cliente_email: customerEmail || undefined,
-        cliente_direccion: customerAddress || 'Dirección no especificada',
+        cliente_email: customerEmail,
+        cliente_direccion: customerAddress,
         items: cart.map(item => ({
             nombre: item.producto,
             cantidad: item.cantidad,
@@ -171,16 +198,15 @@ function sendOrder() {
         notas: customerNotes || 'Sin notas especiales'
     };
 
-    // Deshabilitar botón mientras se procesa
-    const sendBtn = document.getElementById('sendOrder');
-    const originalBtnText = sendBtn.textContent;
-    sendBtn.disabled = true;
-    sendBtn.textContent = '📤 Procesando pedido...';
-    sendBtn.style.opacity = '0.6';
+    const payBtn = document.getElementById('payButton');
+    const originalText = payBtn.textContent;
+    payBtn.disabled = true;
+    payBtn.textContent = '💳 Procesando pago...';
+    payBtn.style.opacity = '0.6';
 
-    console.log('🚀 Enviando pedido a n8n:', orderData);
+    console.log('🚀 Enviando pedido para pago:', orderData);
 
-    // Enviar a n8n (webhook)
+    // Enviar a webhook
     fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
@@ -191,210 +217,172 @@ function sendOrder() {
     .then(response => {
         console.log('📡 Respuesta del servidor:', response.status);
         
-        // Intentar parsear la respuesta como JSON
-        if (response.headers.get('content-type')?.includes('application/json')) {
-            return response.json();
-        } else {
-            // Si no es JSON, crear respuesta básica
-            if (response.ok) {
+        if (!response.ok) {
+            throw new Error(`Error del servidor: ${response.status}`);
+        }
+        
+        return response.text().then(text => {
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                // Si no es JSON válido, crear respuesta de éxito
                 return { 
                     success: true, 
                     message: 'Pedido procesado correctamente',
                     pedido_id: `PED-${Date.now()}`,
                     total_pedido: total
                 };
-            } else {
-                throw new Error(`Error del servidor: ${response.status}`);
             }
-        }
+        });
     })
     .then(data => {
         console.log('📦 Datos recibidos:', data);
         
-        if (data.success) {
-            // ✅ ÉXITO - Pedido procesado correctamente
-            console.log('✅ Pedido procesado exitosamente:', data);
-            
-            // Crear mensaje de éxito
-            let successMessage = `🎉 ¡Pedido procesado exitosamente!\n\n`;
-            
-            if (data.pedido_id) {
-                successMessage += `📋 Número de pedido: ${data.pedido_id}\n`;
-            }
-            
-            successMessage += `💰 Total: $${(data.total_pedido || total).toLocaleString()} COP\n\n`;
-            successMessage += `📱 Te redirigiremos a WhatsApp para confirmar tu pedido.`;
-            
-            alert(successMessage);
-            
-            // Mostrar advertencias si existen (no bloquean el proceso)
-            if (data.warnings && data.warnings.length > 0) {
-                console.warn('⚠️ Advertencias encontradas:', data.warnings);
-                
-                const warningMessage = `⚠️ Algunas advertencias (no afectan tu pedido):\n\n` + 
-                                     data.warnings.map(w => `• ${w}`).join('\n') +
-                                     `\n\n¿Continuar con WhatsApp?`;
-                
-                if (!confirm(warningMessage)) {
-                    return; // No continuar si el usuario cancela
-                }
-            }
-            
-            // Generar mensaje para WhatsApp con datos actualizados
-            const whatsappData = {
-                nombre_cliente: customerName,
-                telefono: customerPhone,
-                direccion: customerAddress,
-                notas: customerNotes,
-                pedido: cart,
-                total: data.total_pedido || total,
-                pedido_id: data.pedido_id,
-                fecha: new Date().toISOString()
-            };
-            
-            generateWhatsAppMessage(whatsappData);
-            
-        } else {
-            // ❌ ERROR DE VALIDACIÓN - El servidor encontró problemas
-            console.error('❌ Errores de validación:', data);
-            
-            let errorMessage = `❌ Se encontraron problemas en tu pedido:\n\n`;
-            
-            // Mostrar errores críticos
-            if (data.errors && data.errors.length > 0) {
-                errorMessage += `🚫 Errores que debes corregir:\n`;
-                data.errors.forEach(error => {
-                    errorMessage += `• ${error}\n`;
-                });
-                errorMessage += '\n';
-            }
-            
-            // Mostrar advertencias
-            if (data.warnings && data.warnings.length > 0) {
-                errorMessage += `⚠️ Advertencias:\n`;
-                data.warnings.forEach(warning => {
-                    errorMessage += `• ${warning}\n`;
-                });
-                errorMessage += '\n';
-            }
-            
-            errorMessage += `Por favor revisa la información y vuelve a intentar.\n\n`;
-            errorMessage += `💡 Si el problema persiste, puedes contactarnos por WhatsApp directamente.`;
-            
-            alert(errorMessage);
-            
-            // No limpiar el carrito para que puedan corregir los errores
-        }
+        // Siempre redirigir a WhatsApp para el pago
+        redirectToWhatsAppPayment({
+            ...orderData,
+            pedido_id: data.pedido_id || `PED-${Date.now()}`,
+            total: total
+        });
+        
+        // Mostrar mensaje de éxito
+        showSuccessMessage();
+        
     })
     .catch(error => {
-        // ❌ ERROR DE CONEXIÓN - Problemas de red o servidor
-        console.error('❌ Error de conexión:', error);
+        console.error('❌ Error:', error);
         
-        let connectionError = `🔌 Error de conexión con nuestro servidor\n\n`;
-        connectionError += `No pudimos procesar tu pedido automáticamente, pero no te preocupes:\n\n`;
-        connectionError += `✅ Te redirigiremos a WhatsApp para completar tu pedido manualmente\n`;
-        connectionError += `✅ Nuestro equipo te atenderá personalmente\n\n`;
-        connectionError += `Detalles del error: ${error.message}`;
+        // Como respaldo, redirigir a WhatsApp
+        alert('🔌 Error temporal del servidor\n\n✅ Te redirigiremos a WhatsApp para completar tu pedido manualmente');
         
-        alert(connectionError);
-        
-        // Como respaldo, generar mensaje para WhatsApp
-        const backupData = {
-            nombre_cliente: customerName,
-            telefono: customerPhone,
-            direccion: customerAddress,
-            notas: customerNotes,
-            pedido: cart,
+        redirectToWhatsAppPayment({
+            ...orderData,
             total: total,
-            fecha: new Date().toISOString(),
             error_backup: true
-        };
+        });
         
-        generateWhatsAppMessage(backupData);
+        showSuccessMessage();
     })
     .finally(() => {
-        // Siempre restaurar el botón al estado original
-        sendBtn.disabled = false;
-        sendBtn.textContent = originalBtnText;
-        sendBtn.style.opacity = '1';
+        payBtn.disabled = false;
+        payBtn.textContent = originalText;
+        payBtn.style.opacity = '1';
     });
 }
 
-function generateWhatsAppMessage(orderData) {
-    console.log('📱 Generando mensaje de WhatsApp:', orderData);
+function redirectToWhatsAppPayment(orderData) {
+    let mensaje = `🍽️ *PEDIDO - LA MONA PIQUETEADERO*\n\n`;
     
-    // Generar mensaje formateado para WhatsApp
-    let mensaje = `🍽️ *NUEVO PEDIDO - LA MONA PIQUETEADERO*\n\n`;
-    
-    // Información del pedido
     if (orderData.pedido_id) {
-        mensaje += `📋 *Pedido:* ${orderData.pedido_id}\n`;
+        mensaje += `📋 *ID:* ${orderData.pedido_id}\n`;
     }
     
-    mensaje += `👤 *Cliente:* ${orderData.nombre_cliente}\n`;
-    mensaje += `📱 *Teléfono:* ${orderData.telefono}\n`;
+    mensaje += `👤 *Cliente:* ${orderData.cliente_nombre}\n`;
+    mensaje += `📱 *Teléfono:* ${orderData.cliente_telefono}\n`;
+    mensaje += `📧 *Email:* ${orderData.cliente_email}\n`;
+    mensaje += `📍 *Dirección:* ${orderData.cliente_direccion}\n\n`;
     
-    if (orderData.direccion && orderData.direccion !== 'Dirección no especificada') {
-        mensaje += `📍 *Dirección:* ${orderData.direccion}\n`;
-    }
-    
-    mensaje += `\n🛒 *PRODUCTOS PEDIDOS:*\n`;
-    
-    // Listar productos
-    orderData.pedido.forEach(item => {
+    mensaje += `🛒 *PRODUCTOS:*\n`;
+    orderData.items.forEach(item => {
         const itemTotal = item.cantidad * item.precio;
-        mensaje += `• ${item.cantidad}x ${item.producto}\n`;
-        mensaje += `  $${item.precio.toLocaleString()} c/u = $${itemTotal.toLocaleString()}\n`;
+        mensaje += `• ${item.cantidad}x ${item.nombre} - $${itemTotal.toLocaleString()}\n`;
     });
     
-    mensaje += `\n💰 *TOTAL: $${orderData.total.toLocaleString()} COP*\n`;
+    mensaje += `\n💰 *TOTAL: $${orderData.total.toLocaleString()} COP*\n\n`;
     
     if (orderData.notas && orderData.notas !== 'Sin notas especiales') {
-        mensaje += `\n📝 *Notas especiales:* ${orderData.notas}\n`;
+        mensaje += `📝 *Notas:* ${orderData.notas}\n\n`;
     }
     
-    // Agregar timestamp
-    mensaje += `\n⏰ *Pedido realizado:* ${new Date().toLocaleString('es-CO')}\n`;
-    
-    // Si fue un error de backup, mencionarlo
-    if (orderData.error_backup) {
-        mensaje += `\n⚠️ *Nota:* Este pedido se envía por WhatsApp debido a un problema técnico temporal.\n`;
-    }
-    
-    mensaje += `\n🙏 ¡Gracias por preferirnos!`;
+    mensaje += `🙏 *Por favor envíame el link de pago para confirmar mi pedido*\n\n`;
+    mensaje += `⏰ ${new Date().toLocaleString('es-CO')}`;
 
-    // Crear URL de WhatsApp
-    const phoneNumber = '573213700248'; // ⚠️ ACTUALIZA CON TU NÚMERO REAL
-    const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(mensaje)}`;
+    const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
     
-    console.log('🔗 URL de WhatsApp generada:', whatsappURL);
+    console.log('🔗 Redirigiendo a WhatsApp:', whatsappURL);
     
-    // Abrir WhatsApp en una nueva pestaña
+    // Abrir WhatsApp
     const whatsappWindow = window.open(whatsappURL, '_blank');
     
-    // Verificar si se pudo abrir la ventana
     if (!whatsappWindow) {
-        alert('❌ No se pudo abrir WhatsApp automáticamente.\n\nPor favor copia el mensaje y contáctanos manualmente:\n\n' + mensaje);
-        
-        // Como alternativa, copiar al clipboard si está disponible
+        alert('❌ No se pudo abrir WhatsApp\n\n📋 El mensaje se ha copiado al portapapeles');
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(mensaje).then(() => {
-                alert('📋 Mensaje copiado al portapapeles');
-            });
+            navigator.clipboard.writeText(mensaje);
         }
-    } else {
-        // Mostrar mensaje de confirmación
-        setTimeout(() => {
-            alert('📱 Te hemos redirigido a WhatsApp para completar tu pedido.\n\n✅ Si no se abrió automáticamente, revisa si tienes bloqueadas las ventanas emergentes.');
-        }, 1000);
     }
+}
+
+function showSuccessMessage() {
+    // Crear overlay de éxito
+    const overlay = document.createElement('div');
+    overlay.className = 'success-overlay';
+    overlay.innerHTML = `
+        <div class="success-message">
+            <div class="success-icon">✅</div>
+            <h2>¡Gracias por tu compra!</h2>
+            <p>Tu pedido ha sido procesado exitosamente</p>
+            <p>Revisa WhatsApp para completar el pago</p>
+        </div>
+    `;
     
-    // Limpiar carrito después del envío exitoso
-    if (!orderData.error_backup) {
-        setTimeout(() => {
-            clearCart();
-        }, 2000);
+    document.body.appendChild(overlay);
+    
+    // Limpiar carrito después de 3 segundos
+    setTimeout(() => {
+        clearCart();
+        overlay.remove();
+    }, 3000);
+}
+
+function validateCustomerInfo() {
+    const name = document.getElementById('customerName').value.trim();
+    const phone = document.getElementById('customerPhone').value.trim();
+    const email = document.getElementById('customerEmail').value.trim();
+    const address = document.getElementById('customerAddress').value.trim();
+
+    if (!name) {
+        alert('📝 Por favor ingresa tu nombre completo');
+        document.getElementById('customerName').focus();
+        return false;
     }
+
+    if (!phone) {
+        alert('📱 Por favor ingresa tu número de teléfono');
+        document.getElementById('customerPhone').focus();
+        return false;
+    }
+
+    if (!email) {
+        alert('📧 Por favor ingresa tu correo electrónico');
+        document.getElementById('customerEmail').focus();
+        return false;
+    }
+
+    if (!address) {
+        alert('📍 Por favor ingresa tu dirección');
+        document.getElementById('customerAddress').focus();
+        return false;
+    }
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        alert('📧 Por favor ingresa un email válido');
+        document.getElementById('customerEmail').focus();
+        return false;
+    }
+
+    // Validar teléfono colombiano
+    const phoneRegex = /^(\+57|57)?[3][0-9]{9}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+        const confirmPhone = confirm('⚠️ El número puede no ser válido para Colombia.\n\n¿Continuar?');
+        if (!confirmPhone) {
+            document.getElementById('customerPhone').focus();
+            return false;
+        }
+    }
+
+    return true;
 }
 
 function clearCart() {
@@ -406,142 +394,167 @@ function clearCart() {
     // Limpiar formulario
     document.getElementById('customerName').value = '';
     document.getElementById('customerPhone').value = '';
-    if (document.getElementById('customerEmail')) {
-        document.getElementById('customerEmail').value = '';
-    }
+    document.getElementById('customerEmail').value = '';
     document.getElementById('customerAddress').value = '';
     document.getElementById('customerNotes').value = '';
     
-    // Hacer scroll al inicio suavemente
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    console.log('✅ Carrito limpiado exitosamente');
 }
 
-// Funciones de utilidad para formato
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0
-    }).format(amount);
-}
-
-// Validación de teléfono colombiano mejorada
-function validateColombianPhone(phone) {
-    const cleanPhone = phone.replace(/\s/g, '');
-    const phoneRegex = /^(\+57|57)?[3][0-9]{9}$/;
-    return phoneRegex.test(cleanPhone);
-}
-
-// Event listeners cuando la página se carga
+// Event listeners
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 La Mona Piqueteadero - Sistema iniciado');
     
-    // Validación en tiempo real del teléfono
+    // Validaciones en tiempo real
     const phoneInput = document.getElementById('customerPhone');
     if (phoneInput) {
         phoneInput.addEventListener('input', function() {
             const phone = this.value.replace(/\s/g, '');
-            if (phone && !validateColombianPhone(phone)) {
-                this.style.borderColor = '#dc3545';
-                this.style.boxShadow = '0 0 5px rgba(220, 53, 69, 0.3)';
-            } else {
-                this.style.borderColor = '#28a745';
-                this.style.boxShadow = '0 0 5px rgba(40, 167, 69, 0.3)';
-            }
+            const isValid = /^(\+57|57)?[3][0-9]{9}$/.test(phone);
+            this.style.borderColor = phone && !isValid ? '#dc3545' : '#28a745';
         });
     }
-    
-    // Validación en tiempo real del nombre
+
+    const emailInput = document.getElementById('customerEmail');
+    if (emailInput) {
+        emailInput.addEventListener('input', function() {
+            const email = this.value.trim();
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            this.style.borderColor = email && !isValid ? '#dc3545' : '#28a745';
+        });
+    }
+
     const nameInput = document.getElementById('customerName');
     if (nameInput) {
         nameInput.addEventListener('input', function() {
             const name = this.value.trim();
-            if (name.length < 2) {
-                this.style.borderColor = '#dc3545';
-            } else {
-                this.style.borderColor = '#28a745';
-            }
+            this.style.borderColor = name.length < 2 ? '#dc3545' : '#28a745';
         });
     }
-    
-    // Smooth scroll para enlaces internos
+
+    // Smooth scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });
     
-    // Inicializar carrito vacío
     updateCartDisplay();
 });
 
-// Manejo de errores globales
-window.addEventListener('error', function(event) {
-    console.error('❌ Error global capturado:', event.error);
-});
+// CSS para modal y overlay (agregar a tu CSS)
+const style = document.createElement('style');
+style.textContent = `
+.payment-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
 
-// Manejo de promesas rechazadas
-window.addEventListener('unhandledrejection', function(event) {
-    console.error('❌ Promesa rechazada:', event.reason);
-});
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 400px;
+    text-align: center;
+    margin: 20px;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-cancel, .btn-confirm {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-cancel {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-confirm {
+    background: #28a745;
+    color: white;
+}
+
+.success-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+}
+
+.success-message {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 350px;
+    margin: 20px;
+}
+
+.success-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+`;
+document.head.appendChild(style);
 
 /* 
 =================================
-INSTRUCCIONES PARA INTEGRAR N8N:
+RECOMENDACIONES DE SEGURIDAD:
 =================================
 
-1. Crear un webhook en n8n:
-   - Ve a tu instancia de n8n
-   - Crea un nuevo workflow
-   - Agrega un nodo "Webhook"
-   - Copia la URL del webhook
+1. OCULTAR WEBHOOK URL:
+   - Crear API intermedia en tu servidor
+   - Usar variables de entorno
+   - Implementar proxy reverso
 
-2. Reemplazar la URL en este archivo:
-   - Busca la línea: const WEBHOOK_URL = 'https://TU_WEBHOOK_N8N_AQUI.com/webhook/pedidos';
-   - Reemplaza con tu URL real
+2. OFUSCAR CÓDIGO:
+   - Usar herramientas como: terser, uglify-js
+   - Minificar y comprimir archivos
+   - Ejemplo: npm install terser -g && terser script.js -c -m -o script.min.js
 
-3. Configurar el flujo en n8n:
-   - El webhook recibirá un JSON con esta estructura:
-   {
-     "nombre_cliente": "Juan Pérez",
-     "telefono": "+573001234567",
-     "direccion": "Calle 123 #45-67",
-     "notas": "Sin cebolla en la hamburguesa",
-     "pedido": [
-       {
-         "producto": "Hamburguesa La Mona",
-         "cantidad": 2,
-         "precio": 15000,
-         "total": 30000
-       }
-     ],
-     "total": 30000,
-     "fecha": "2024-01-15T10:30:00.000Z",
-     "timestamp": 1705320600000
-   }
+3. PROXY BACKEND (Recomendado):
+   - Crear endpoint: /api/orders en tu servidor
+   - Redirigir peticiones a n8n desde backend
+   - Nunca exponer URLs directas de n8n
 
-4. Posibles acciones en n8n:
-   - Guardar en base de datos
-   - Enviar email de notificación
-   - Integrar con sistema de inventario
-   - Enviar notificación a Slack/Discord
-   - Integrar con WhatsApp Business API
-   - Generar factura automática
+4. VALIDACIONES ADICIONALES:
+   - Rate limiting
+   - CORS headers
+   - Input sanitization
 
-5. Respuesta esperada de n8n:
-   - Status 200 para éxito
-   - JSON con { "success": true, "message": "Pedido recibido" }
-
-6. Testing:
-   - Puedes probar el webhook usando herramientas como Postman
-   - O simplemente hacer un pedido de prueba desde la página web
+5. IMPLEMENTACIÓN SUGERIDA:
+   
+   Backend (Node.js/PHP):
+   POST /api/orders -> proxy to n8n webhook
+   
+   Frontend:
+   const WEBHOOK_URL = '/api/orders'; // URL relativa segura
 */
