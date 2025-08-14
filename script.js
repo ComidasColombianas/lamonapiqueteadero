@@ -1,6 +1,6 @@
 // Configuración del webhook de n8n
 // ⚠️ IMPORTANTE: Reemplaza esta URL con tu webhook real de n8n
-const WEBHOOK_URL = 'https://TU_WEBHOOK_N8N_AQUI.com/webhook/pedidos';
+const WEBHOOK_URL = 'https://comidagourmet92302.app.n8n.cloud/webhook/recibir-pedido';
 
 // Variables globales
 let cart = [];
@@ -120,50 +120,67 @@ function scrollToCart() {
 function sendOrder() {
     // Validar que hay productos en el carrito
     if (cart.length === 0) {
-        alert('Tu carrito está vacío');
+        alert('🛒 Tu carrito está vacío\n\nAgrega algunos productos antes de enviar tu pedido.');
         return;
     }
 
     // Obtener información del cliente
     const customerName = document.getElementById('customerName').value.trim();
     const customerPhone = document.getElementById('customerPhone').value.trim();
+    const customerEmail = document.getElementById('customerEmail') ? document.getElementById('customerEmail').value.trim() : '';
     const customerAddress = document.getElementById('customerAddress').value.trim();
     const customerNotes = document.getElementById('customerNotes').value.trim();
 
-    // Validar campos obligatorios
+    // Validaciones básicas del lado del cliente
     if (!customerName) {
-        alert('Por favor ingresa tu nombre');
+        alert('📝 Por favor ingresa tu nombre completo');
         document.getElementById('customerName').focus();
         return;
     }
 
     if (!customerPhone) {
-        alert('Por favor ingresa tu número de teléfono');
+        alert('📱 Por favor ingresa tu número de teléfono');
         document.getElementById('customerPhone').focus();
         return;
+    }
+
+    // Validación básica de teléfono colombiano
+    const phoneRegex = /^(\+57|57)?[3][0-9]{9}$/;
+    if (!phoneRegex.test(customerPhone.replace(/\s/g, ''))) {
+        const confirmPhone = confirm('⚠️ El número de teléfono puede no ser válido para Colombia.\n\n¿Deseas continuar de todas formas?');
+        if (!confirmPhone) {
+            document.getElementById('customerPhone').focus();
+            return;
+        }
     }
 
     // Calcular total
     const total = cart.reduce((sum, item) => sum + item.total, 0);
 
-    // Preparar datos para n8n
+    // Preparar datos para n8n - FORMATO ACTUALIZADO
     const orderData = {
-        nombre_cliente: customerName,
-        telefono: customerPhone,
-        direccion: customerAddress || 'No especificada',
-        notas: customerNotes || 'Sin notas especiales',
-        pedido: cart,
-        total: total,
-        fecha: new Date().toISOString(),
-        timestamp: Date.now()
+        cliente_nombre: customerName,
+        cliente_telefono: customerPhone,
+        cliente_email: customerEmail || undefined,
+        cliente_direccion: customerAddress || 'Dirección no especificada',
+        items: cart.map(item => ({
+            nombre: item.producto,
+            cantidad: item.cantidad,
+            precio: item.precio
+        })),
+        notas: customerNotes || 'Sin notas especiales'
     };
 
     // Deshabilitar botón mientras se procesa
     const sendBtn = document.getElementById('sendOrder');
+    const originalBtnText = sendBtn.textContent;
     sendBtn.disabled = true;
-    sendBtn.textContent = '📤 Enviando...';
+    sendBtn.textContent = '📤 Procesando pedido...';
+    sendBtn.style.opacity = '0.6';
 
-    // 1️⃣ Enviar a n8n (webhook)
+    console.log('🚀 Enviando pedido a n8n:', orderData);
+
+    // Enviar a n8n (webhook)
     fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
@@ -172,82 +189,233 @@ function sendOrder() {
         body: JSON.stringify(orderData)
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error('Error en el servidor');
+        console.log('📡 Respuesta del servidor:', response.status);
+        
+        // Intentar parsear la respuesta como JSON
+        if (response.headers.get('content-type')?.includes('application/json')) {
+            return response.json();
+        } else {
+            // Si no es JSON, crear respuesta básica
+            if (response.ok) {
+                return { 
+                    success: true, 
+                    message: 'Pedido procesado correctamente',
+                    pedido_id: `PED-${Date.now()}`,
+                    total_pedido: total
+                };
+            } else {
+                throw new Error(`Error del servidor: ${response.status}`);
+            }
         }
-        return response.json();
     })
     .then(data => {
-        console.log('✅ Pedido enviado exitosamente a n8n:', data);
+        console.log('📦 Datos recibidos:', data);
         
-        // 2️⃣ Generar mensaje para WhatsApp
-        generateWhatsAppMessage(orderData);
-        
+        if (data.success) {
+            // ✅ ÉXITO - Pedido procesado correctamente
+            console.log('✅ Pedido procesado exitosamente:', data);
+            
+            // Crear mensaje de éxito
+            let successMessage = `🎉 ¡Pedido procesado exitosamente!\n\n`;
+            
+            if (data.pedido_id) {
+                successMessage += `📋 Número de pedido: ${data.pedido_id}\n`;
+            }
+            
+            successMessage += `💰 Total: $${(data.total_pedido || total).toLocaleString()} COP\n\n`;
+            successMessage += `📱 Te redirigiremos a WhatsApp para confirmar tu pedido.`;
+            
+            alert(successMessage);
+            
+            // Mostrar advertencias si existen (no bloquean el proceso)
+            if (data.warnings && data.warnings.length > 0) {
+                console.warn('⚠️ Advertencias encontradas:', data.warnings);
+                
+                const warningMessage = `⚠️ Algunas advertencias (no afectan tu pedido):\n\n` + 
+                                     data.warnings.map(w => `• ${w}`).join('\n') +
+                                     `\n\n¿Continuar con WhatsApp?`;
+                
+                if (!confirm(warningMessage)) {
+                    return; // No continuar si el usuario cancela
+                }
+            }
+            
+            // Generar mensaje para WhatsApp con datos actualizados
+            const whatsappData = {
+                nombre_cliente: customerName,
+                telefono: customerPhone,
+                direccion: customerAddress,
+                notas: customerNotes,
+                pedido: cart,
+                total: data.total_pedido || total,
+                pedido_id: data.pedido_id,
+                fecha: new Date().toISOString()
+            };
+            
+            generateWhatsAppMessage(whatsappData);
+            
+        } else {
+            // ❌ ERROR DE VALIDACIÓN - El servidor encontró problemas
+            console.error('❌ Errores de validación:', data);
+            
+            let errorMessage = `❌ Se encontraron problemas en tu pedido:\n\n`;
+            
+            // Mostrar errores críticos
+            if (data.errors && data.errors.length > 0) {
+                errorMessage += `🚫 Errores que debes corregir:\n`;
+                data.errors.forEach(error => {
+                    errorMessage += `• ${error}\n`;
+                });
+                errorMessage += '\n';
+            }
+            
+            // Mostrar advertencias
+            if (data.warnings && data.warnings.length > 0) {
+                errorMessage += `⚠️ Advertencias:\n`;
+                data.warnings.forEach(warning => {
+                    errorMessage += `• ${warning}\n`;
+                });
+                errorMessage += '\n';
+            }
+            
+            errorMessage += `Por favor revisa la información y vuelve a intentar.\n\n`;
+            errorMessage += `💡 Si el problema persiste, puedes contactarnos por WhatsApp directamente.`;
+            
+            alert(errorMessage);
+            
+            // No limpiar el carrito para que puedan corregir los errores
+        }
     })
     .catch(error => {
-        console.error('❌ Error al enviar a n8n:', error);
+        // ❌ ERROR DE CONEXIÓN - Problemas de red o servidor
+        console.error('❌ Error de conexión:', error);
         
-        // Si falla n8n, al menos enviar por WhatsApp
-        alert('Hubo un problema con el sistema, pero te redirigiremos a WhatsApp para completar tu pedido.');
-        generateWhatsAppMessage(orderData);
+        let connectionError = `🔌 Error de conexión con nuestro servidor\n\n`;
+        connectionError += `No pudimos procesar tu pedido automáticamente, pero no te preocupes:\n\n`;
+        connectionError += `✅ Te redirigiremos a WhatsApp para completar tu pedido manualmente\n`;
+        connectionError += `✅ Nuestro equipo te atenderá personalmente\n\n`;
+        connectionError += `Detalles del error: ${error.message}`;
+        
+        alert(connectionError);
+        
+        // Como respaldo, generar mensaje para WhatsApp
+        const backupData = {
+            nombre_cliente: customerName,
+            telefono: customerPhone,
+            direccion: customerAddress,
+            notas: customerNotes,
+            pedido: cart,
+            total: total,
+            fecha: new Date().toISOString(),
+            error_backup: true
+        };
+        
+        generateWhatsAppMessage(backupData);
     })
     .finally(() => {
-        // Restaurar botón
+        // Siempre restaurar el botón al estado original
         sendBtn.disabled = false;
-        sendBtn.textContent = '📱 Enviar Pedido por WhatsApp';
+        sendBtn.textContent = originalBtnText;
+        sendBtn.style.opacity = '1';
     });
 }
 
 function generateWhatsAppMessage(orderData) {
+    console.log('📱 Generando mensaje de WhatsApp:', orderData);
+    
     // Generar mensaje formateado para WhatsApp
     let mensaje = `🍽️ *NUEVO PEDIDO - LA MONA PIQUETEADERO*\n\n`;
+    
+    // Información del pedido
+    if (orderData.pedido_id) {
+        mensaje += `📋 *Pedido:* ${orderData.pedido_id}\n`;
+    }
+    
     mensaje += `👤 *Cliente:* ${orderData.nombre_cliente}\n`;
     mensaje += `📱 *Teléfono:* ${orderData.telefono}\n`;
     
-    if (orderData.direccion && orderData.direccion !== 'No especificada') {
+    if (orderData.direccion && orderData.direccion !== 'Dirección no especificada') {
         mensaje += `📍 *Dirección:* ${orderData.direccion}\n`;
     }
     
-    mensaje += `\n🛒 *PEDIDO:*\n`;
+    mensaje += `\n🛒 *PRODUCTOS PEDIDOS:*\n`;
     
+    // Listar productos
     orderData.pedido.forEach(item => {
-        mensaje += `• ${item.cantidad}x ${item.producto} = ${item.total.toLocaleString()} COP\n`;
+        const itemTotal = item.cantidad * item.precio;
+        mensaje += `• ${item.cantidad}x ${item.producto}\n`;
+        mensaje += `  $${item.precio.toLocaleString()} c/u = $${itemTotal.toLocaleString()}\n`;
     });
     
-    mensaje += `\n💰 *TOTAL: ${orderData.total.toLocaleString()} COP*\n`;
+    mensaje += `\n💰 *TOTAL: $${orderData.total.toLocaleString()} COP*\n`;
     
     if (orderData.notas && orderData.notas !== 'Sin notas especiales') {
-        mensaje += `\n📝 *Notas:* ${orderData.notas}\n`;
+        mensaje += `\n📝 *Notas especiales:* ${orderData.notas}\n`;
     }
     
-    mensaje += `\n⏰ Pedido realizado: ${new Date().toLocaleString('es-CO')}`;
+    // Agregar timestamp
+    mensaje += `\n⏰ *Pedido realizado:* ${new Date().toLocaleString('es-CO')}\n`;
+    
+    // Si fue un error de backup, mencionarlo
+    if (orderData.error_backup) {
+        mensaje += `\n⚠️ *Nota:* Este pedido se envía por WhatsApp debido a un problema técnico temporal.\n`;
+    }
+    
+    mensaje += `\n🙏 ¡Gracias por preferirnos!`;
 
     // Crear URL de WhatsApp
-    const phoneNumber = '573000001234'; // Número de WhatsApp del negocio
+    const phoneNumber = '573213700248'; // ⚠️ ACTUALIZA CON TU NÚMERO REAL
     const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(mensaje)}`;
     
-    // Abrir WhatsApp
-    window.open(whatsappURL, '_blank');
+    console.log('🔗 URL de WhatsApp generada:', whatsappURL);
     
-    // Mostrar mensaje de confirmación
-    alert('🎉 ¡Pedido procesado! Te hemos redirigido a WhatsApp para completar tu orden.');
+    // Abrir WhatsApp en una nueva pestaña
+    const whatsappWindow = window.open(whatsappURL, '_blank');
     
-    // Limpiar carrito después del envío
-    clearCart();
+    // Verificar si se pudo abrir la ventana
+    if (!whatsappWindow) {
+        alert('❌ No se pudo abrir WhatsApp automáticamente.\n\nPor favor copia el mensaje y contáctanos manualmente:\n\n' + mensaje);
+        
+        // Como alternativa, copiar al clipboard si está disponible
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(mensaje).then(() => {
+                alert('📋 Mensaje copiado al portapapeles');
+            });
+        }
+    } else {
+        // Mostrar mensaje de confirmación
+        setTimeout(() => {
+            alert('📱 Te hemos redirigido a WhatsApp para completar tu pedido.\n\n✅ Si no se abrió automáticamente, revisa si tienes bloqueadas las ventanas emergentes.');
+        }, 1000);
+    }
+    
+    // Limpiar carrito después del envío exitoso
+    if (!orderData.error_backup) {
+        setTimeout(() => {
+            clearCart();
+        }, 2000);
+    }
 }
 
 function clearCart() {
+    console.log('🧹 Limpiando carrito...');
+    
     cart = [];
     updateCartDisplay();
     
     // Limpiar formulario
     document.getElementById('customerName').value = '';
     document.getElementById('customerPhone').value = '';
+    if (document.getElementById('customerEmail')) {
+        document.getElementById('customerEmail').value = '';
+    }
     document.getElementById('customerAddress').value = '';
     document.getElementById('customerNotes').value = '';
     
-    // Hacer scroll al inicio
+    // Hacer scroll al inicio suavemente
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    console.log('✅ Carrito limpiado exitosamente');
 }
 
 // Funciones de utilidad para formato
@@ -259,24 +427,44 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-// Validación de teléfono colombiano
+// Validación de teléfono colombiano mejorada
 function validateColombianPhone(phone) {
+    const cleanPhone = phone.replace(/\s/g, '');
     const phoneRegex = /^(\+57|57)?[3][0-9]{9}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
+    return phoneRegex.test(cleanPhone);
 }
 
 // Event listeners cuando la página se carga
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 La Mona Piqueteadero - Sistema iniciado');
+    
     // Validación en tiempo real del teléfono
     const phoneInput = document.getElementById('customerPhone');
-    phoneInput.addEventListener('input', function() {
-        const phone = this.value.replace(/\s/g, '');
-        if (phone && !validateColombianPhone(phone)) {
-            this.style.borderColor = '#dc3545';
-        } else {
-            this.style.borderColor = '#ddd';
-        }
-    });
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            const phone = this.value.replace(/\s/g, '');
+            if (phone && !validateColombianPhone(phone)) {
+                this.style.borderColor = '#dc3545';
+                this.style.boxShadow = '0 0 5px rgba(220, 53, 69, 0.3)';
+            } else {
+                this.style.borderColor = '#28a745';
+                this.style.boxShadow = '0 0 5px rgba(40, 167, 69, 0.3)';
+            }
+        });
+    }
+    
+    // Validación en tiempo real del nombre
+    const nameInput = document.getElementById('customerName');
+    if (nameInput) {
+        nameInput.addEventListener('input', function() {
+            const name = this.value.trim();
+            if (name.length < 2) {
+                this.style.borderColor = '#dc3545';
+            } else {
+                this.style.borderColor = '#28a745';
+            }
+        });
+    }
     
     // Smooth scroll para enlaces internos
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -291,6 +479,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Inicializar carrito vacío
+    updateCartDisplay();
+});
+
+// Manejo de errores globales
+window.addEventListener('error', function(event) {
+    console.error('❌ Error global capturado:', event.error);
+});
+
+// Manejo de promesas rechazadas
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('❌ Promesa rechazada:', event.reason);
 });
 
 /* 
