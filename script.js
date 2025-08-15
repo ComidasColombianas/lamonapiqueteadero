@@ -1,36 +1,14 @@
-// 🔒 CONFIGURACIÓN GITHUB ACTION PROXY
-const GITHUB_CONFIG = {
-    owner: 'comidascolombianas',
-    repo: 'comidascolombianas.github.io'
-};
+        // // 🔒 CONFIGURACIÓN GITHUB ACTION PROXY
+        // const GITHUB_CONFIG = {
+        //     owner: 'comidascolombianas',
+        //     repo: 'comidascolombianas.github.io'
 
-// URL para disparar el GitHub Action
-const GITHUB_PROXY_URL = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/dispatches`;
-
-// Función para hacer pedidos a través del proxy
-async function hacerPedido(datosPedido) {
-    try {
-        const response = await fetch(GITHUB_PROXY_URL, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/vnd.github.v3+json',
-                // ❌ NO pongas Authorization aquí
-            },
-            body: JSON.stringify({
-                event_type: 'pedido_comida',
-                client_payload: datosPedido
-            })
-        });
-        
-        return response.ok;
-    } catch (error) {
-        console.error('Error:', error);
-        return false;
-    }
-}
+        // };
 // Variables globales
 let cart = [];
 const WHATSAPP_NUMBER = '573213700248';
+const WEBHOOK_URL = 'https://la-mona-proxy-shrill-dew-f9c0.alexa9001.workers.dev'; // nuevo proxy
+
 
 // Funciones principales
 function updateQuantity(button, change) {
