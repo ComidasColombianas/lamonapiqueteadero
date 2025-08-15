@@ -5,457 +5,945 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Mona Piqueteadero</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #ffff00;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            color: #666;
+        }
+
+        .product-name {
+            color: #ff4444;
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .product-price {
+            color: #28a745;
+            font-size: 1.3em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .quantity-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quantity-btn:hover {
+            background: #ff6666;
+            transform: scale(1.1);
+        }
+
+        .quantity-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #ffcc00, #ffa500);
+            color: #333;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.4);
+        }
+
+        /* Carrito fijo en la parte inferior */
+        .cart-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 3px solid #ff4444;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
+            padding: 15px 20px;
+            z-index: 1000;
+            display: none;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        .cart-section.show {
+            display: block;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .cart-badge {
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .cart-badge.empty {
+            background: #ccc;
+        }
+
+        .cart-total {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ff4444;
+        }
+
+        .cart-items {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .cart-item-price {
+            color: #28a745;
+            font-size: 0.9em;
+        }
+
+        .customer-info {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .customer-info input, .customer-info textarea {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9em;
+            transition: border-color 0.3s ease;
+        }
+
+        .customer-info input:focus, .customer-info textarea:focus {
+            outline: none;
+            border-color: #ff4444;
+        }
+
+        .pay-button {
+            width: 100%;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .pay-button:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .pay-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Modal */
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: #ff4444;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .modal-content ul {
+            text-align: left;
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-confirm {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Success overlay */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .success-message {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        .success-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .success-message h2 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+                margin-bottom: 200px;
+            }
+            
+            .customer-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .cart-section {
+                max-height: 50vh;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Nuestros Productos</h1>
         </div>
-        <div class="products-grid">
-            <div class="product-card" data-product="salchipapa">
-                <div class="product-image">🍟</div>
-                <div class="product-name">Salchipapa Especial</div>
-                <div class="product-price">$12.000 COP</div>
-                <div class="quantity-control">
-                    <button class="quantity-btn minus" data-product="salchipapa">-</button>
-                    <span class="quantity-display" data-product="salchipapa">0</span>
-                    <button class="quantity-btn plus" data-product="salchipapa">+</button>
-                </div>
-                <button class="add-to-cart-btn" data-product="salchipapa">Agregar al Carrito</button>
-            </div>
 
-            <div class="product-card" data-product="hamburguesa">
-                <div class="product-image">🍔</div>
-                <div class="product-name">Hamburguesa La Mona</div>
-                <div class="product-price">$15.000 COP</div>
-                <div class="quantity-control">
-                    <button class="quantity-btn minus" data-product="hamburguesa">-</button>
-                    <span class="quantity-display" data-product="hamburguesa">0</span>
-                    <button class="quantity-btn plus" data-product="hamburguesa">+</button>
+        <div class="products-section">
+            <div class="products-grid">
+                <!-- Salchipapa -->
+                <div class="product-card">
+                    <div class="product-image">🍟</div>
+                    <div class="product-name">Salchipapa Especial</div>
+                    <div class="product-price">$12.000 COP</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
+                        <span class="quantity-display">0</span>
+                        <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCart('Salchipapa Especial', 12000, this)">
+                        Agregar al Carrito
+                    </button>
                 </div>
-                <button class="add-to-cart-btn" data-product="hamburguesa">Agregar al Carrito</button>
-            </div>
 
-            <div class="product-card" data-product="combo_familiar">
-                <div class="product-image">🍽️</div>
-                <div class="product-name">Combo Familiar</div>
-                <div class="product-price">$35.000 COP</div>
-                <div class="quantity-control">
-                    <button class="quantity-btn minus" data-product="combo_familiar">-</button>
-                    <span class="quantity-display" data-product="combo_familiar">0</span>
-                    <button class="quantity-btn plus" data-product="combo_familiar">+</button>
+                <!-- Hamburguesa -->
+                <div class="product-card">
+                    <div class="product-image">🍔</div>
+                    <div class="product-name">Hamburguesa La Mona</div>
+                    <div class="product-price">$15.000 COP</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
+                        <span class="quantity-display">0</span>
+                        <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCart('Hamburguesa La Mona', 15000, this)">
+                        Agregar al Carrito
+                    </button>
                 </div>
-                <button class="add-to-cart-btn" data-product="combo_familiar">Agregar al Carrito</button>
-            </div>
 
-            <div class="product-card" data-product="alitas">
-                <div class="product-image">🍗</div>
-                <div class="product-name">Alitas BBQ</div>
-                <div class="product-price">$18.000 COP</div>
-                <div class="quantity-control">
-                    <button class="quantity-btn minus" data-product="alitas">-</button>
-                    <span class="quantity-display" data-product="alitas">0</span>
-                    <button class="quantity-btn plus" data-product="alitas">+</button>
+                <!-- Combo Familiar -->
+                <div class="product-card">
+                    <div class="product-image">🍽️</div>
+                    <div class="product-name">Combo Familiar</div>
+                    <div class="product-price">$35.000 COP</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
+                        <span class="quantity-display">0</span>
+                        <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCart('Combo Familiar', 35000, this)">
+                        Agregar al Carrito
+                    </button>
                 </div>
-                <button class="add-to-cart-btn" data-product="alitas">Agregar al Carrito</button>
-            </div>
 
-            <div class="product-card" data-product="perro_caliente">
-                <div class="product-image">🌭</div>
-                <div class="product-name">Perro Caliente Especial</div>
-                <div class="product-price">$10.000 COP</div>
-                <div class="quantity-control">
-                    <button class="quantity-btn minus" data-product="perro_caliente">-</button>
-                    <span class="quantity-display" data-product="perro_caliente">0</span>
-                    <button class="quantity-btn plus" data-product="perro_caliente">+</button>
+                <!-- Alitas -->
+                <div class="product-card">
+                    <div class="product-image">🍗</div>
+                    <div class="product-name">Alitas BBQ</div>
+                    <div class="product-price">$18.000 COP</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
+                        <span class="quantity-display">0</span>
+                        <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCart('Alitas BBQ', 18000, this)">
+                        Agregar al Carrito
+                    </button>
                 </div>
-                <button class="add-to-cart-btn" data-product="perro_caliente">Agregar al Carrito</button>
-            </div>
 
-            <div class="product-card" data-product="combo_pareja">
-                <div class="product-image">💕</div>
-                <div class="product-name">Combo Pareja</div>
-                <div class="product-price">$25.000 COP</div>
-                <div class="quantity-control">
-                    <button class="quantity-btn minus" data-product="combo_pareja">-</button>
-                    <span class="quantity-display" data-product="combo_pareja">0</span>
-                    <button class="quantity-btn plus" data-product="combo_pareja">+</button>
+                <!-- Perro Caliente -->
+                <div class="product-card">
+                    <div class="product-image">🌭</div>
+                    <div class="product-name">Perro Caliente Especial</div>
+                    <div class="product-price">$10.000 COP</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
+                        <span class="quantity-display">0</span>
+                        <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCart('Perro Caliente Especial', 10000, this)">
+                        Agregar al Carrito
+                    </button>
                 </div>
-                <button class="add-to-cart-btn" data-product="combo_pareja">Agregar al Carrito</button>
+
+                <!-- Combo Pareja -->
+                <div class="product-card">
+                    <div class="product-image">💕</div>
+                    <div class="product-name">Combo Pareja</div>
+                    <div class="product-price">$25.000 COP</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
+                        <span class="quantity-display">0</span>
+                        <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCart('Combo Pareja', 25000, this)">
+                        Agregar al Carrito
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Cart Summary -->
-    <div class="cart-summary" id="cartSummary">
-        <div class="cart-content">
-            <div class="cart-info">
-                <div class="cart-badge" id="cartBadge">0</div>
-                <div class="cart-total" id="cartTotal">Total: $0 COP</div>
+    <!-- Carrito fijo -->
+    <div id="cartSection" class="cart-section">
+        <div class="cart-header">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div id="cartBadge" class="cart-badge empty">0</div>
+                <div id="cartTotal" class="cart-total">Total: $0 COP</div>
             </div>
-            <div class="cart-actions">
-                <button class="btn-secondary" onclick="clearCart()">Limpiar</button>
-                <button class="btn-primary" onclick="showCheckoutModal()">Pagar</button>
-            </div>
+            <button onclick="scrollToCart()" style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer;">
+                Ver Carrito
+            </button>
         </div>
-    </div>
 
-    <!-- Checkout Modal -->
-    <div id="checkoutModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🛒 Confirmar Pedido</h2>
-                <span class="close" onclick="closeCheckoutModal()">&times;</span>
-            </div>
-            
-            <div class="error-message" id="errorMessage"></div>
-            <div class="success-message" id="successMessage"></div>
-            
-            <div class="order-summary">
-                <h3>Resumen del Pedido:</h3>
-                <div id="orderDetails"></div>
-                <div class="order-total" id="modalTotal"></div>
-            </div>
+        <div id="cartItems" class="cart-items"></div>
 
-            <div class="form-group">
-                <label for="customerName">Nombre Completo: *</label>
-                <input type="text" id="customerName" required>
-            </div>
-
-            <div class="form-group">
-                <label for="customerPhone">Teléfono: *</label>
-                <input type="tel" id="customerPhone" required>
-            </div>
-
-            <div class="form-group">
-                <label for="customerEmail">Correo Electrónico: *</label>
-                <input type="email" id="customerEmail" required>
-            </div>
-
-            <div class="form-group">
-                <label for="customerAddress">Dirección: *</label>
-                <input type="text" id="customerAddress" required>
-            </div>
-
-            <div class="form-group">
-                <label for="specialNotes">Notas especiales:</label>
-                <textarea id="specialNotes" placeholder="Instrucciones especiales para tu pedido..."></textarea>
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button class="btn-secondary" onclick="closeCheckoutModal()">Cancelar</button>
-                <button class="btn-primary" onclick="processPayment()" id="payButton">💳 Confirmar Pedido</button>
-            </div>
+        <div id="customerInfo" class="customer-info">
+            <input type="text" id="customerName" placeholder="Nombre completo *" required>
+            <input type="tel" id="customerPhone" placeholder="Teléfono *" required>
+            <input type="email" id="customerEmail" placeholder="Email *" required>
+            <input type="text" id="customerAddress" placeholder="Dirección *" required>
+            <textarea id="customerNotes" placeholder="Notas especiales (opcional)" rows="2"></textarea>
         </div>
+
+        <button id="payButton" class="pay-button" onclick="showPaymentModal()">
+            💳 Pagar - Procesar Pedido
+        </button>
     </div>
 
     <script>
-        // Datos de productos
-        const products = {
-            salchipapa: { name: 'Salchipapa Especial', price: 12000 },
-            hamburguesa: { name: 'Hamburguesa La Mona', price: 15000 },
-            combo_familiar: { name: 'Combo Familiar', price: 35000 },
-            alitas: { name: 'Alitas BBQ', price: 18000 },
-            perro_caliente: { name: 'Perro Caliente Especial', price: 10000 },
-            combo_pareja: { name: 'Combo Pareja', price: 25000 }
-        };
+        // Variables globales
+        let cart = [];
+        const WHATSAPP_NUMBER = '573213700248';
+        const WEBHOOK_URL = 'https://la-mona-proxy-shrill-dew-f9c0.alexa9001.workers.dev';
 
-        // Estado del carrito
-        let cart = {};
-
-        // Inicializar la aplicación
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            updateCartDisplay();
-        });
-
-        function setupEventListeners() {
-            // Botones de cantidad
-            document.querySelectorAll('.quantity-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const productId = this.dataset.product;
-                    const isPlus = this.classList.contains('plus');
-                    
-                    if (isPlus) {
-                        increaseQuantity(productId);
-                    } else {
-                        decreaseQuantity(productId);
-                    }
-                });
-            });
-
-            // Botones agregar al carrito
-            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const productId = this.dataset.product;
-                    addToCart(productId);
-                });
-            });
+        // Funciones principales
+        function updateQuantity(button, change) {
+            const quantityDisplay = button.parentElement.querySelector('.quantity-display');
+            let currentQuantity = parseInt(quantityDisplay.textContent);
+            const newQuantity = Math.max(0, currentQuantity + change);
+            quantityDisplay.textContent = newQuantity;
         }
 
-        function increaseQuantity(productId) {
-            const display = document.querySelector(`[data-product="${productId}"].quantity-display`);
-            let quantity = parseInt(display.textContent) + 1;
-            display.textContent = quantity;
-            
-            // Auto-agregar al carrito cuando la cantidad es >= 1
-            if (quantity >= 1) {
-                cart[productId] = quantity;
-                updateCartDisplay();
-            }
-        }
-
-        function decreaseQuantity(productId) {
-            const display = document.querySelector(`[data-product="${productId}"].quantity-display`);
-            let quantity = Math.max(0, parseInt(display.textContent) - 1);
-            display.textContent = quantity;
+        function addToCart(productName, price, button) {
+            const quantityElement = button.parentElement.querySelector('.quantity-display');
+            const quantity = parseInt(quantityElement.textContent);
             
             if (quantity === 0) {
-                delete cart[productId];
+                alert('⚠️ Selecciona una cantidad primero');
+                return;
+            }
+
+            const existingItemIndex = cart.findIndex(item => item.producto === productName);
+            
+            if (existingItemIndex > -1) {
+                cart[existingItemIndex].cantidad += quantity;
+                cart[existingItemIndex].total = cart[existingItemIndex].cantidad * cart[existingItemIndex].precio;
             } else {
-                cart[productId] = quantity;
+                cart.push({
+                    producto: productName,
+                    cantidad: quantity,
+                    precio: price,
+                    total: quantity * price
+                });
             }
+
+            quantityElement.textContent = '0';
             updateCartDisplay();
-        }
-
-        function addToCart(productId) {
-            const display = document.querySelector(`[data-product="${productId}"].quantity-display`);
-            const quantity = parseInt(display.textContent);
             
-            if (quantity > 0) {
-                cart[productId] = quantity;
-                updateCartDisplay();
-                showSuccessAnimation(productId);
-            }
-        }
-
-        function showSuccessAnimation(productId) {
-            const btn = document.querySelector(`[data-product="${productId}"].add-to-cart-btn`);
-            const originalText = btn.textContent;
-            btn.textContent = '✓ Agregado';
-            btn.style.background = '#28a745';
-            
+            // Animación de éxito
+            button.textContent = '✅ Agregado';
+            button.style.background = '#28a745';
             setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.background = '#ffc107';
-            }, 1000);
+                button.textContent = 'Agregar al Carrito';
+                button.style.background = 'linear-gradient(45deg, #ffcc00, #ffa500)';
+            }, 1500);
         }
 
         function updateCartDisplay() {
-            const cartSummary = document.getElementById('cartSummary');
-            const cartBadge = document.getElementById('cartBadge');
+            const cartSection = document.getElementById('cartSection');
+            const cartItems = document.getElementById('cartItems');
             const cartTotal = document.getElementById('cartTotal');
+            const cartBadge = document.getElementById('cartBadge');
+            const customerInfo = document.getElementById('customerInfo');
+            const payBtn = document.getElementById('payButton');
             
-            let totalItems = 0;
-            let totalPrice = 0;
-            
-            Object.keys(cart).forEach(productId => {
-                const quantity = cart[productId];
-                const price = products[productId].price;
-                totalItems += quantity;
-                totalPrice += quantity * price;
-            });
-            
-            cartBadge.textContent = totalItems;
-            cartTotal.textContent = `Total: $${totalPrice.toLocaleString()} COP`;
-            
-            if (totalItems > 0) {
-                cartSummary.classList.add('active');
-            } else {
-                cartSummary.classList.remove('active');
+            if (cart.length === 0) {
+                cartSection.classList.remove('show');
+                cartBadge.classList.add('empty');
+                cartBadge.textContent = '0';
+                return;
             }
+
+            cartSection.classList.add('show');
+            
+            let cartHTML = '';
+            let total = 0;
+            let totalItems = 0;
+
+            cart.forEach((item, index) => {
+                cartHTML += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.cantidad}x ${item.producto}</div>
+                            <div class="cart-item-price">$${item.total.toLocaleString()} COP</div>
+                        </div>
+                        <button onclick="removeFromCart(${index})" style="background: #dc3545; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">×</button>
+                    </div>
+                `;
+                total += item.total;
+                totalItems += item.cantidad;
+            });
+
+            cartItems.innerHTML = cartHTML;
+            cartTotal.textContent = `Total: $${total.toLocaleString()} COP`;
+            customerInfo.style.display = 'grid';
+            payBtn.style.display = 'block';
+            cartBadge.classList.remove('empty');
+            cartBadge.textContent = totalItems;
         }
 
-        function clearCart() {
-            cart = {};
-            // Resetear todas las cantidades en pantalla
-            document.querySelectorAll('.quantity-display').forEach(display => {
-                display.textContent = '0';
-            });
+        function removeFromCart(index) {
+            cart.splice(index, 1);
             updateCartDisplay();
         }
 
-        function showCheckoutModal() {
-            if (Object.keys(cart).length === 0) {
-                alert('Tu carrito está vacío');
+        function scrollToCart() {
+            if (cart.length > 0) {
+                document.getElementById('cartSection').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                document.querySelector('.products-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function showPaymentModal() {
+            if (cart.length === 0) {
+                alert('🛒 Tu carrito está vacío\n\nAgrega algunos productos antes de continuar.');
                 return;
             }
+
+            if (!validateCustomerInfo()) {
+                return;
+            }
+
+            const total = cart.reduce((sum, item) => sum + item.total, 0);
+            const customerName = document.getElementById('customerName').value.trim();
             
-            const modal = document.getElementById('checkoutModal');
-            const orderDetails = document.getElementById('orderDetails');
-            const modalTotal = document.getElementById('modalTotal');
-            
-            // Generar resumen del pedido
-            let html = '';
-            let total = 0;
-            
-            Object.keys(cart).forEach(productId => {
-                const product = products[productId];
-                const quantity = cart[productId];
-                const subtotal = product.price * quantity;
-                total += subtotal;
-                
-                html += `
-                    <div class="order-item">
-                        <span>${product.name} x${quantity}</span>
-                        <span>$${subtotal.toLocaleString()} COP</span>
+            const modal = document.createElement('div');
+            modal.className = 'payment-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>🍽️ Confirmar Pedido</h3>
+                    <p><strong>${customerName}</strong>, tu pedido será procesado automáticamente:</p>
+                    <ul>
+                        <li>📄 Se enviará a nuestro sistema</li>
+                        <li>💳 Recibirás link de pago por WhatsApp</li>
+                        <li>📧 Confirmación por email</li>
+                    </ul>
+                    <p><strong>Total: $${total.toLocaleString()} COP</strong></p>
+                    <div class="modal-buttons">
+                        <button onclick="closeModal()" class="btn-cancel">Cancelar</button>
+                        <button onclick="processPayment()" class="btn-confirm">Confirmar Pedido</button>
                     </div>
-                `;
-            });
+                </div>
+            `;
             
-            orderDetails.innerHTML = html;
-            modalTotal.textContent = `Total: $${total.toLocaleString()} COP`;
-            
-            modal.style.display = 'block';
+            document.body.appendChild(modal);
         }
 
-        function closeCheckoutModal() {
-            const modal = document.getElementById('checkoutModal');
-            modal.style.display = 'none';
-            clearMessages();
+        function closeModal() {
+            const modal = document.querySelector('.payment-modal');
+            if (modal) modal.remove();
         }
 
-        function clearMessages() {
-            document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'none';
-        }
-
-        function showError(message) {
-            const errorEl = document.getElementById('errorMessage');
-            errorEl.textContent = message;
-            errorEl.style.display = 'block';
-            document.getElementById('successMessage').style.display = 'none';
-        }
-
-        function showSuccess(message) {
-            const successEl = document.getElementById('successMessage');
-            successEl.textContent = message;
-            successEl.style.display = 'block';
-            document.getElementById('errorMessage').style.display = 'none';
-        }
-
+        // Función principal de pago usando Cloudflare Worker
         async function processPayment() {
-            clearMessages();
-            
-            // Validar formulario
-            const name = document.getElementById('customerName').value.trim();
-            const phone = document.getElementById('customerPhone').value.trim();
-            const email = document.getElementById('customerEmail').value.trim();
-            const address = document.getElementById('customerAddress').value.trim();
-            const notes = document.getElementById('specialNotes').value.trim();
-            
-            if (!name || !phone || !email || !address) {
-                showError('Por favor completa todos los campos obligatorios');
-                return;
-            }
-            
-            // Crear objeto del pedido
+            closeModal();
+
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const customerEmail = document.getElementById('customerEmail').value.trim();
+            const customerAddress = document.getElementById('customerAddress').value.trim();
+            const customerNotes = document.getElementById('customerNotes').value.trim();
+
+            const total = cart.reduce((sum, item) => sum + item.total, 0);
+
             const orderData = {
-                cliente_nombre: name,
-                cliente_telefono: phone,
-                cliente_email: email,
-                cliente_direccion: address,
-                notas_especiales: notes,
-                items: Object.keys(cart).map(productId => ({
-                    producto: products[productId].name,
-                    cantidad: cart[productId],
-                    precio_unitario: products[productId].price,
-                    subtotal: cart[productId] * products[productId].price
+                cliente_nombre: customerName,
+                cliente_telefono: customerPhone,
+                cliente_email: customerEmail,
+                cliente_direccion: customerAddress,
+                items: cart.map(item => ({
+                    nombre: item.producto,
+                    cantidad: item.cantidad,
+                    precio: item.precio
                 })),
-                total: Object.keys(cart).reduce((sum, productId) => 
-                    sum + (cart[productId] * products[productId].price), 0
-                ),
-                fecha: new Date().toISOString()
+                notas: customerNotes || 'Sin notas especiales',
+                total: total
             };
-            
-            // Deshabilitar botón durante el proceso
-            const payButton = document.getElementById('payButton');
-            const originalText = payButton.textContent;
-            payButton.disabled = true;
-            payButton.textContent = 'Procesando...';
-            
+
+            const payBtn = document.getElementById('payButton');
+            const originalText = payBtn.textContent;
+            payBtn.disabled = true;
+            payBtn.textContent = '📤 Enviando pedido...';
+            payBtn.style.opacity = '0.6';
+
+            console.log('🚀 Enviando pedido a Cloudflare Worker:', orderData);
+
             try {
-                console.log('Enviando pedido:', orderData);
-                
-                // Intentar enviar a la API
-                const response = await fetch('/api/pedidos', {
+                const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(orderData)
                 });
+
+                const result = await response.json();
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    showSuccess('¡Pedido enviado exitosamente! Te contactaremos pronto.');
+                if (response.ok && result.success) {
+                    console.log('✅ Pedido enviado exitosamente via Worker');
+                    showSuccessMessage(result.pedido_id || 'XXX');
+                    
                     setTimeout(() => {
-                        clearCart();
-                        closeCheckoutModal();
+                        redirectToWhatsAppPayment({
+                            ...orderData,
+                            pedido_id: result.pedido_id || `PED-${Date.now()}`
+                        });
                     }, 2000);
+                    
                 } else {
-                    throw new Error(`Error del servidor: ${response.status}`);
+                    throw new Error(result.error || 'Error del servidor');
                 }
                 
             } catch (error) {
-                console.error('Error al procesar el pedido:', error);
+                console.error('❌ Error enviando a Worker:', error);
+                alert('⚠️ Error de conexión\n\n📱 Redirigiendo a WhatsApp');
                 
-                // Fallback: redirigir a WhatsApp
-                const whatsappMessage = createWhatsAppMessage(orderData);
-                const whatsappUrl = `https://wa.me/573210000000?text=${encodeURIComponent(whatsappMessage)}`;
+                redirectToWhatsAppPayment({
+                    ...orderData,
+                    pedido_id: `PED-BACKUP-${Date.now()}`,
+                    error_backup: true
+                });
                 
-                showError('Error en el sistema. Redirigiendo a WhatsApp...');
-                setTimeout(() => {
-                    window.open(whatsappUrl, '_blank');
-                    clearCart();
-                    closeCheckoutModal();
-                }, 2000);
+            } finally {
+                payBtn.disabled = false;
+                payBtn.textContent = originalText;
+                payBtn.style.opacity = '1';
             }
-            
-            // Rehabilitar botón
-            payButton.disabled = false;
-            payButton.textContent = originalText;
         }
 
-        function createWhatsAppMessage(orderData) {
-            let message = `🍽️ *NUEVO PEDIDO - LA MONA PIQUETEADERO*\n\n`;
-            message += `👤 *Cliente:* ${orderData.cliente_nombre}\n`;
-            message += `📱 *Teléfono:* ${orderData.cliente_telefono}\n`;
-            message += `📧 *Email:* ${orderData.cliente_email}\n`;
-            message += `📍 *Dirección:* ${orderData.cliente_direccion}\n\n`;
+        function redirectToWhatsAppPayment(orderData) {
+            let mensaje = `🍽️ *PEDIDO - LA MONA PIQUETEADERO*\n\n`;
             
-            message += `📋 *PRODUCTOS:*\n`;
+            if (orderData.pedido_id) {
+                mensaje += `📋 *ID:* ${orderData.pedido_id}\n`;
+            }
+            
+            mensaje += `👤 *Cliente:* ${orderData.cliente_nombre}\n`;
+            mensaje += `📱 *Teléfono:* ${orderData.cliente_telefono}\n`;
+            mensaje += `📧 *Email:* ${orderData.cliente_email}\n`;
+            mensaje += `📍 *Dirección:* ${orderData.cliente_direccion}\n\n`;
+            
+            mensaje += `🛒 *PRODUCTOS:*\n`;
             orderData.items.forEach(item => {
-                message += `• ${item.producto} x${item.cantidad} - $${item.subtotal.toLocaleString()} COP\n`;
+                const itemTotal = item.cantidad * item.precio;
+                mensaje += `• ${item.cantidad}x ${item.nombre} - $${itemTotal.toLocaleString()}\n`;
             });
             
-            message += `\n💰 *TOTAL: $${orderData.total.toLocaleString()} COP*\n`;
+            mensaje += `\n💰 *TOTAL: $${orderData.total.toLocaleString()} COP*\n\n`;
             
-            if (orderData.notas_especiales) {
-                message += `\n📝 *Notas especiales:* ${orderData.notas_especiales}\n`;
+            if (orderData.notas && orderData.notas !== 'Sin notas especiales') {
+                mensaje += `📝 *Notas:* ${orderData.notas}\n\n`;
             }
             
-            message += `\n⏰ *Fecha:* ${new Date().toLocaleString('es-CO')}`;
+            mensaje += `🙏 *Por favor envíame el link de pago para confirmar mi pedido*\n\n`;
+            mensaje += `⏰ ${new Date().toLocaleString('es-CO')}`;
+
+            const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
             
-            return message;
+            console.log('📗 Abriendo WhatsApp...');
+            window.open(whatsappURL, '_blank');
         }
 
-        // Cerrar modal al hacer clic fuera
-        window.onclick = function(event) {
-            const modal = document.getElementById('checkoutModal');
-            if (event.target == modal) {
-                closeCheckoutModal();
+        function showSuccessMessage(pedidoId) {
+            const overlay = document.createElement('div');
+            overlay.className = 'success-overlay';
+            overlay.innerHTML = `
+                <div class="success-message">
+                    <div class="success-icon">✅</div>
+                    <h2>¡Pedido Enviado!</h2>
+                    <p>Tu pedido #${pedidoId} ha sido procesado</p>
+                    <p>Redirigiendo a WhatsApp para el pago...</p>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            setTimeout(() => {
+                clearCart();
+                overlay.remove();
+            }, 4000);
+        }
+
+        function validateCustomerInfo() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const email = document.getElementById('customerEmail').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+
+            if (!name) {
+                alert('📝 Por favor ingresa tu nombre completo');
+                document.getElementById('customerName').focus();
+                return false;
+            }
+
+            if (!phone) {
+                alert('📱 Por favor ingresa tu número de teléfono');
+                document.getElementById('customerPhone').focus();
+                return false;
+            }
+
+            if (!email) {
+                alert('📧 Por favor ingresa tu correo electrónico');
+                document.getElementById('customerEmail').focus();
+                return false;
+            }
+
+            if (!address) {
+                alert('📍 Por favor ingresa tu dirección');
+                document.getElementById('customerAddress').focus();
+                return false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('📧 Por favor ingresa un email válido');
+                document.getElementById('customerEmail').focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function clearCart() {
+            console.log('🧹 Limpiando carrito...');
+            cart = [];
+            updateCartDisplay();
+            
+            // Limpiar formulario
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('customerEmail').value = '';
+            document.getElementById('customerAddress').value = '';
+            document.getElementById('customerNotes').value = '';
+            
+            // Resetear todas las cantidades a 0
+            document.querySelectorAll('.quantity-display').forEach(display => {
+                display.textContent = '0';
+            });
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 La Mona Piqueteadero - Sistema con Cloudflare Worker iniciado');
+            
+            // Validación en tiempo real para teléfono
+            const phoneInput = document.getElementById('customerPhone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function() {
+                    const phone = this.value.replace(/\s/g, '');
+                    const isValid = /^(\+57|57)?[3][0-9]{9}$/.test(phone);
+                    this.style.borderColor = phone && !isValid ? '#dc3545' : '#28a745';
+                });
+            }
+
+            // Validación en tiempo real para email
+            const emailInput = document.getElementById('customerEmail');
+            if (emailInput) {
+                emailInput.addEventListener('input', function() {
+                    const email = this.value.trim();
+                    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+                    this.style.borderColor = email && !isValid ? '#dc3545' : '#28a745';
+                });
+            }
+
+            // Validación en tiempo real para nombre
+            const nameInput = document.getElementById('customerName');
+            if (nameInput) {
+                nameInput.addEventListener('input', function() {
+                    const name = this.value.trim();
+                    this.style.borderColor = name.length < 2 ? '#dc3545' : '#28a745';
+                });
+            }
+
+            // Validación en tiempo real para dirección
+            const addressInput = document.getElementById('customerAddress');
+            if (addressInput) {
+                addressInput.addEventListener('input', function() {
+                    const address = this.value.trim();
+                    this.style.borderColor = address.length < 3 ? '#dc3545' : '#28a745';
+                });
+            }
+
+            // Scroll suave para enlaces internos
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+            
+            updateCartDisplay();
+        });
+
+        // Función adicional para manejar el Worker de Cloudflare (NUEVA)
+        async function hacerPedidoProxy(orderData) {
+            try {
+                console.log('📡 Enviando a Cloudflare Worker...');
+                
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'nuevo_pedido',
+                        data: orderData
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('✅ Respuesta del Worker:', result);
+                
+                return {
+                    success: true,
+                    pedido_id: result.pedido_id || `PED-${Date.now()}`,
+                    message: result.message || 'Pedido procesado exitosamente'
+                };
+
+            } catch (error) {
+                console.error('❌ Error en Worker:', error);
+                return {
+                    success: false,
+                    error: error.message,
+                    message: 'Error procesando el pedido'
+                };
             }
         }
     </script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
 </body>
 </html>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'GA_MEASUREMENT_ID');
-</script>
+<!DOCTYPE html>
