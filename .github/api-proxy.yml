@@ -1,23 +1,8 @@
 name: API Proxy for Orders
-
 on:
-  # Opción 1: Se dispara con cualquier push (FÁCIL)
-  push:
-    branches: [ main, master ]
-    paths:
-      - 'orders/**'  # Solo si hay cambios en carpeta orders
-  
-  # Opción 2: Webhook manual desde el repositorio
+  # Se activa cuando recibe un webhook desde tu página web
   repository_dispatch:
     types: [process_order]
-  
-  # Opción 3: Endpoint HTTP público usando Issues (RECOMENDADO)
-  issues:
-    types: [opened]
-  
-  # Opción 4: Webhook schedule para procesar pedidos pendientes
-  schedule:
-    - cron: '*/5 * * * *'  # Cada 5 minutos
 
 jobs:
   process-order:
@@ -27,53 +12,53 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Check for new orders
-        id: check_orders
-        run: |
-          echo "🔍 Verificando nuevos pedidos..."
-          
-          # Verificar si hay archivo de pedido nuevo
-          if [ -f "orders/pending.json" ]; then
-            echo "📋 Pedido encontrado en archivo"
-            ORDER_DATA=$(cat orders/pending.json)
-            echo "order_data=$ORDER_DATA" >> $GITHUB_OUTPUT
-            echo "has_order=true" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" == "issues" ]; then
-            echo "📋 Pedido encontrado en issue"
-            ISSUE_BODY='${{ github.event.issue.body }}'
-            echo "order_data=$ISSUE_BODY" >> $GITHUB_OUTPUT
-            echo "has_order=true" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" == "repository_dispatch" ]; then
-            echo "📋 Pedido encontrado en dispatch"
-            ORDER_DATA='${{ toJson(github.event.client_payload) }}'
-            echo "order_data=$ORDER_DATA" >> $GITHUB_OUTPUT
-            echo "has_order=true" >> $GITHUB_OUTPUT
-          else
-            echo "ℹ️ No hay pedidos nuevos"
-            echo "has_order=false" >> $GITHUB_OUTPUT
-          fi
-          
       - name: Validate Order Data
-        if: steps.check_orders.outputs.has_order == 'true'
+        id: validate
         run: |
           echo "🔍 Validando datos del pedido..."
-          ORDER_DATA='${{ steps.check_orders.outputs.order_data }}'
-          echo "Datos recibidos: $ORDER_DATA"
+          
+          # Obtener datos del webhook
+          order_data='${{ toJson(github.event.client_payload) }}'
+          echo "Datos recibidos: $order_data"
+          
+          # Validaciones básicas (puedes expandir)
+          if [[ -z "${{ github.event.client_payload.cliente_nombre }}" ]]; then
+            echo "❌ Error: Nombre requerido"
+            exit 1
+          fi
+          
+          if [[ -z "${{ github.event.client_payload.cliente_email }}" ]]; then
+            echo "❌ Error: Email requerido"
+            exit 1
+          fi
+          
+          echo "✅ Validaciones pasadas"
           
       - name: Forward to N8N
-        if: steps.check_orders.outputs.has_order == 'true'
         run: |
           echo "📤 Enviando a N8N..."
           
-          # Obtener datos del pedido
-          ORDER_DATA='${{ steps.check_orders.outputs.order_data }}'
+          # Construir JSON para n8n
+          order_json=$(cat << 'EOF'
+          {
+            "cliente_nombre": "${{ github.event.client_payload.cliente_nombre }}",
+            "cliente_telefono": "${{ github.event.client_payload.cliente_telefono }}",
+            "cliente_email": "${{ github.event.client_payload.cliente_email }}",
+            "cliente_direccion": "${{ github.event.client_payload.cliente_direccion }}",
+            "items": ${{ toJson(github.event.client_payload.items) }},
+            "notas": "${{ github.event.client_payload.notas }}",
+            "procesado_por": "GitHub-Action-Proxy",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+          )
           
           # Enviar a n8n
           response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
             -X POST \
             -H "Content-Type: application/json" \
             -H "User-Agent: LaMonaGitHubProxy/1.0" \
-            -d "$ORDER_DATA" \
+            -d "$order_json" \
             "${{ secrets.N8N_WEBHOOK_URL }}")
           
           # Separar respuesta y código HTTP
@@ -85,34 +70,15 @@ jobs:
           
           if [[ $status -eq 200 ]] || [[ $status -eq 201 ]]; then
             echo "✅ Pedido enviado exitosamente a n8n"
-            
-            # Limpiar archivo de pedido procesado
-            if [ -f "orders/pending.json" ]; then
-              rm orders/pending.json
-              git config --local user.email "action@github.com"
-              git config --local user.name "GitHub Action"
-              git add -A
-              git commit -m "🧹 Pedido procesado y archivo limpiado" || exit 0
-              git push
-            fi
-            
-            # Cerrar issue si fue procesado desde issue
-            if [ "${{ github.event_name }}" == "issues" ]; then
-              curl -X PATCH \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer ${{ secrets.KEY_VAULT }}" \
-                https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }} \
-                -d '{"state":"closed"}'
-            fi
-            
           else
             echo "❌ Error enviando a n8n: Status $status"
             exit 1
           fi
           
       - name: Log Success
-        if: success() && steps.check_orders.outputs.has_order == 'true'
+        if: success()
         run: |
           echo "🎉 Pedido procesado exitosamente"
+          echo "Cliente: ${{ github.event.client_payload.cliente_nombre }}"
+          echo "Email: ${{ github.event.client_payload.cliente_email }}"
           echo "Timestamp: $(date)"
-
