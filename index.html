@@ -685,30 +685,24 @@
 
             try {
                 const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(orderData)
-                });
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+            
+            if (response.ok) {
+                // Mostrar mensaje de confirmación
+                alert("Se redireccionará a WhatsApp para enviar un link de pago y el resumen de su pedido.");
+                
+                // Redirigir a WhatsApp con el mensaje prellenado
+                const mensaje = encodeURIComponent(
+                    `Hola, quiero confirmar mi pedido:\n\n${JSON.stringify(orderData, null, 2)}`
+                );
+                window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${mensaje}`;
+            } else {
+                alert("Hubo un error al procesar tu pedido.");
+            }
 
-                const result = await response.json();
-                
-                if (response.ok && result.success) {
-                    console.log('✅ Pedido enviado exitosamente via Worker');
-                    showSuccessMessage(result.pedido_id || 'XXX');
-                    
-                    setTimeout(() => {
-                        redirectToWhatsAppPayment({
-                            ...orderData,
-                            pedido_id: result.pedido_id || `PED-${Date.now()}`
-                        });
-                    }, 2000);
-                    
-                } else {
-                    throw new Error(result.error || 'Error del servidor');
-                }
-                
             } catch (error) {
                 console.error('❌ Error enviando a Worker:', error);
                 alert('⚠️ Error de conexión\n\n📱 Redirigiendo a WhatsApp');
@@ -901,20 +895,24 @@
                 console.log('📡 Enviando a Cloudflare Worker...');
                 
                 const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'nuevo_pedido',
-                        data: orderData
-                    })
-                });
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+            
+            if (response.ok) {
+                // Mostrar mensaje de confirmación
+                alert("Se redireccionará a WhatsApp para enviar un link de pago y el resumen de su pedido.");
+                
+                // Redirigir a WhatsApp con el mensaje prellenado
+                const mensaje = encodeURIComponent(
+                    `Hola, quiero confirmar mi pedido:\n\n${JSON.stringify(orderData, null, 2)}`
+                );
+                window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${mensaje}`;
+            } else {
+                alert("Hubo un error al procesar tu pedido.");
+            }
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
 
                 const result = await response.json();
                 console.log('✅ Respuesta del Worker:', result);
