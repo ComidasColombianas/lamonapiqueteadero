@@ -10,7 +10,7 @@ const WHATSAPP_NUMBER = '573213700248';
 const WEBHOOK_URL = 'https://la-mona-proxy-shrill-dew-f9c0.alexa9001.workers.dev'; // nuevo proxy
 
 
-// Funciones principales
+// Funciones principales (resto igual que antes)
 function updateQuantity(button, change) {
     const quantityDisplay = button.parentElement.querySelector('.quantity-display');
     let currentQuantity = parseInt(quantityDisplay.textContent);
@@ -44,7 +44,6 @@ function addToCart(productName, price, button) {
     quantityElement.textContent = '0';
     updateCartDisplay();
     
-    // Feedback visual mejorado
     button.textContent = '✅ Agregado';
     button.style.background = '#28a745';
     setTimeout(() => {
@@ -110,7 +109,6 @@ function scrollToCart() {
     }
 }
 
-// Nueva función: Mostrar modal de confirmación
 function showPaymentModal() {
     if (cart.length === 0) {
         alert('🛒 Tu carrito está vacío\n\nAgrega algunos productos antes de continuar.');
@@ -129,16 +127,16 @@ function showPaymentModal() {
     modal.innerHTML = `
         <div class="modal-content">
             <h3>🍽️ Confirmar Pedido</h3>
-            <p><strong>${customerName}</strong>, se redireccionará a WhatsApp para:</p>
+            <p><strong>${customerName}</strong>, tu pedido será procesado automáticamente:</p>
             <ul>
-                <li>📄 Resumen de tu pedido</li>
-                <li>💳 Link de pago seguro</li>
+                <li>📄 Se enviará a nuestro sistema</li>
+                <li>💳 Recibirás link de pago por WhatsApp</li>
                 <li>📧 Confirmación por email</li>
             </ul>
             <p><strong>Total: $${total.toLocaleString()} COP</strong></p>
             <div class="modal-buttons">
                 <button onclick="closeModal()" class="btn-cancel">Cancelar</button>
-                <button onclick="processPayment()" class="btn-confirm">Enviar y Pagar</button>
+                <button onclick="processPayment()" class="btn-confirm">Confirmar Pedido</button>
             </div>
         </div>
     `;
@@ -151,8 +149,8 @@ function closeModal() {
     if (modal) modal.remove();
 }
 
-// Función principal de pago actualizada
-function processPayment() {
+// Función principal de pago - ACTUALIZADA
+async function processPayment() {
     closeModal();
 
     const customerName = document.getElementById('customerName').value.trim();
@@ -179,59 +177,43 @@ function processPayment() {
     const payBtn = document.getElementById('payButton');
     const originalText = payBtn.textContent;
     payBtn.disabled = true;
-    payBtn.textContent = '💳 Procesando pago...';
+    payBtn.textContent = '📤 Enviando pedido...';
     payBtn.style.opacity = '0.6';
 
-    console.log('🚀 Enviando pedido para pago:', orderData);
+    console.log('🚀 Enviando pedido:', orderData);
 
-    // Enviar a webhook
-    fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData)
-    })
-    .then(response => {
-        console.log('📡 Respuesta del servidor:', response.status);
+    try {
+        const resultado = await hacerPedidoProxy(orderData);
         
-        if (!response.ok) {
-            throw new Error(`Error del servidor: ${response.status}`);
+        if (resultado.success) {
+            console.log('✅ Pedido enviado exitosamente');
+            
+            // Mostrar mensaje de éxito primero
+            showSuccessMessage(resultado.issue_number);
+            
+            // Esperar un momento antes de redirigir
+            setTimeout(() => {
+                redirectToWhatsAppPayment({
+                    ...orderData,
+                    pedido_id: `PED-${resultado.issue_number}-${Date.now()}`,
+                    total: total
+                });
+            }, 1500);
+            
+        } else {
+            console.error('❌ Error:', resultado.message);
+            alert('❌ Error procesando el pedido\n\n📱 Te redirigiremos a WhatsApp');
+            
+            redirectToWhatsAppPayment({
+                ...orderData,
+                total: total,
+                error_backup: true
+            });
         }
         
-        return response.text().then(text => {
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                // Si no es JSON válido, crear respuesta de éxito
-                return { 
-                    success: true, 
-                    message: 'Pedido procesado correctamente',
-                    pedido_id: `PED-${Date.now()}`,
-                    total_pedido: total
-                };
-            }
-        });
-    })
-    .then(data => {
-        console.log('📦 Datos recibidos:', data);
-        
-        // Siempre redirigir a WhatsApp para el pago
-        redirectToWhatsAppPayment({
-            ...orderData,
-            pedido_id: data.pedido_id || `PED-${Date.now()}`,
-            total: total
-        });
-        
-        // Mostrar mensaje de éxito
-        showSuccessMessage();
-        
-    })
-    .catch(error => {
-        console.error('❌ Error:', error);
-        
-        // Como respaldo, redirigir a WhatsApp
-        alert('🔌 Error temporal del servidor\n\n✅ Te redirigiremos a WhatsApp para completar tu pedido manualmente');
+    } catch (error) {
+        console.error('❌ Error crítico:', error);
+        alert('⚠️ Error de conexión\n\n📱 Redirigiendo a WhatsApp');
         
         redirectToWhatsAppPayment({
             ...orderData,
@@ -239,13 +221,11 @@ function processPayment() {
             error_backup: true
         });
         
-        showSuccessMessage();
-    })
-    .finally(() => {
+    } finally {
         payBtn.disabled = false;
         payBtn.textContent = originalText;
         payBtn.style.opacity = '1';
-    });
+    }
 }
 
 function redirectToWhatsAppPayment(orderData) {
@@ -277,39 +257,28 @@ function redirectToWhatsAppPayment(orderData) {
 
     const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
     
-    console.log('🔗 Redirigiendo a WhatsApp:', whatsappURL);
-    
-    // Abrir WhatsApp
-    const whatsappWindow = window.open(whatsappURL, '_blank');
-    
-    if (!whatsappWindow) {
-        alert('❌ No se pudo abrir WhatsApp\n\n📋 El mensaje se ha copiado al portapapeles');
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(mensaje);
-        }
-    }
+    console.log('🔗 Abriendo WhatsApp...');
+    window.open(whatsappURL, '_blank');
 }
 
-function showSuccessMessage() {
-    // Crear overlay de éxito
+function showSuccessMessage(issueNumber) {
     const overlay = document.createElement('div');
     overlay.className = 'success-overlay';
     overlay.innerHTML = `
         <div class="success-message">
             <div class="success-icon">✅</div>
-            <h2>¡Gracias por tu compra!</h2>
-            <p>Tu pedido ha sido procesado exitosamente</p>
-            <p>Revisa WhatsApp para completar el pago</p>
+            <h2>¡Pedido Enviado!</h2>
+            <p>Tu pedido #${issueNumber || 'XXX'} ha sido procesado</p>
+            <p>Redirigiendo a WhatsApp para el pago...</p>
         </div>
     `;
     
     document.body.appendChild(overlay);
     
-    // Limpiar carrito después de 3 segundos
     setTimeout(() => {
         clearCart();
         overlay.remove();
-    }, 3000);
+    }, 4000);
 }
 
 function validateCustomerInfo() {
@@ -342,7 +311,6 @@ function validateCustomerInfo() {
         return false;
     }
 
-    // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         alert('📧 Por favor ingresa un email válido');
@@ -350,26 +318,14 @@ function validateCustomerInfo() {
         return false;
     }
 
-    // Validar teléfono colombiano
-    const phoneRegex = /^(\+57|57)?[3][0-9]{9}$/;
-    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
-        const confirmPhone = confirm('⚠️ El número puede no ser válido para Colombia.\n\n¿Continuar?');
-        if (!confirmPhone) {
-            document.getElementById('customerPhone').focus();
-            return false;
-        }
-    }
-
     return true;
 }
 
 function clearCart() {
     console.log('🧹 Limpiando carrito...');
-    
     cart = [];
     updateCartDisplay();
     
-    // Limpiar formulario
     document.getElementById('customerName').value = '';
     document.getElementById('customerPhone').value = '';
     document.getElementById('customerEmail').value = '';
@@ -381,9 +337,8 @@ function clearCart() {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 La Mona Piqueteadero - Sistema iniciado');
+    console.log('🚀 La Mona Piqueteadero - Sistema con GitHub Issues iniciado');
     
-    // Validaciones en tiempo real
     const phoneInput = document.getElementById('customerPhone');
     if (phoneInput) {
         phoneInput.addEventListener('input', function() {
@@ -410,7 +365,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Smooth scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -423,116 +377,3 @@ document.addEventListener('DOMContentLoaded', function() {
     
     updateCartDisplay();
 });
-
-// CSS para modal y overlay (agregar a tu CSS)
-const style = document.createElement('style');
-style.textContent = `
-.payment-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-}
-
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    max-width: 400px;
-    text-align: center;
-    margin: 20px;
-}
-
-.modal-buttons {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-
-.btn-cancel, .btn-confirm {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.btn-cancel {
-    background: #dc3545;
-    color: white;
-}
-
-.btn-confirm {
-    background: #28a745;
-    color: white;
-}
-
-.success-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10001;
-}
-
-.success-message {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    max-width: 350px;
-    margin: 20px;
-}
-
-.success-icon {
-    font-size: 60px;
-    margin-bottom: 20px;
-}
-`;
-document.head.appendChild(style);
-
-/* 
-=================================
-RECOMENDACIONES DE SEGURIDAD:
-=================================
-
-1. OCULTAR WEBHOOK URL:
-   - Crear API intermedia en tu servidor
-   - Usar variables de entorno
-   - Implementar proxy reverso
-
-2. OFUSCAR CÓDIGO:
-   - Usar herramientas como: terser, uglify-js
-   - Minificar y comprimir archivos
-   - Ejemplo: npm install terser -g && terser script.js -c -m -o script.min.js
-
-3. PROXY BACKEND (Recomendado):
-   - Crear endpoint: /api/orders en tu servidor
-   - Redirigir peticiones a n8n desde backend
-   - Nunca exponer URLs directas de n8n
-
-4. VALIDACIONES ADICIONALES:
-   - Rate limiting
-   - CORS headers
-   - Input sanitization
-
-5. IMPLEMENTACIÓN SUGERIDA:
-   
-   Backend (Node.js/PHP):
-   POST /api/orders -> proxy to n8n webhook
-   
-   Frontend:
-   const WEBHOOK_URL = '/api/orders'; // URL relativa segura
-*/

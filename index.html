@@ -8,187 +8,447 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="logo">La Mona</div>
-        <h1 class="logo-main">Piqueteadero</h1>
-        <p class="tagline">El mejor sabor en combos y porciones</p>
-        <a href="#productos" class="btn-ordena">Ordena Ya</a>
-    </header>
-
-    <!-- Contact Section -->
-    <section class="contact-section">
-        <h2 class="contact-title">Contáctanos 😋</h2>
-        <div class="contact-icons">
-            <a href="tel:+573213700248" class="contact-icon phone">
-                📞
-                <span class="contact-label">Llámanos</span>
-            </a>
-            <a href="https://wa.me/573213700248" class="contact-icon">
-                💬
-                <span class="contact-label">WhatsApp</span>
-            </a>
-            <a href="#" class="contact-icon receipt">
-                🧾
-                <span class="contact-label">Llámanos</span>
-            </a>
+    <div class="container">
+        <div class="header">
+            <h1>Nuestros Productos</h1>
         </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features">
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-image">🎉</div>
-                <h3 class="feature-title">Reserva y Celebra</h3>
-                <p class="feature-description">Tenemos todo planeado para el mejor día de las sus queridos con la mejor comida y compañía.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-image">🍽️</div>
-                <h3 class="feature-title">Servimos en Grande</h3>
-                <p class="feature-description">Nos gusta satisfacer el apetito para aquellos que les encanta la comida Colombiana.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-image">💳</div>
-                <h3 class="feature-title">Facilidad de Pago</h3>
-                <p class="feature-description">Recibe el domicilio y paga por el medio que prefieras, efectivo o transferencia.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Products Section -->
-    <section class="products-section" id="productos">
-        <h2 class="section-title">Nuestros Productos</h2>
         <div class="products-grid">
-            <div class="product-card">
-                <h3 class="product-name">Salchipapa Especial</h3>
+            <div class="product-card" data-product="salchipapa">
+                <div class="product-image">🍟</div>
+                <div class="product-name">Salchipapa Especial</div>
                 <div class="product-price">$12.000 COP</div>
-                <div class="quantity-controls">
-                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
-                    <span class="quantity-display">0</span>
-                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                <div class="quantity-control">
+                    <button class="quantity-btn minus" data-product="salchipapa">-</button>
+                    <span class="quantity-display" data-product="salchipapa">0</span>
+                    <button class="quantity-btn plus" data-product="salchipapa">+</button>
                 </div>
-                <button class="add-to-cart" onclick="addToCart('Salchipapa Especial', 12000, this)">Agregar al Carrito</button>
+                <button class="add-to-cart-btn" data-product="salchipapa">Agregar al Carrito</button>
             </div>
 
-            <div class="product-card">
-                <h3 class="product-name">Hamburguesa La Mona</h3>
+            <div class="product-card" data-product="hamburguesa">
+                <div class="product-image">🍔</div>
+                <div class="product-name">Hamburguesa La Mona</div>
                 <div class="product-price">$15.000 COP</div>
-                <div class="quantity-controls">
-                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
-                    <span class="quantity-display">0</span>
-                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                <div class="quantity-control">
+                    <button class="quantity-btn minus" data-product="hamburguesa">-</button>
+                    <span class="quantity-display" data-product="hamburguesa">0</span>
+                    <button class="quantity-btn plus" data-product="hamburguesa">+</button>
                 </div>
-                <button class="add-to-cart" onclick="addToCart('Hamburguesa La Mona', 15000, this)">Agregar al Carrito</button>
+                <button class="add-to-cart-btn" data-product="hamburguesa">Agregar al Carrito</button>
             </div>
 
-            <div class="product-card">
-                <h3 class="product-name">Combo Familiar</h3>
+            <div class="product-card" data-product="combo_familiar">
+                <div class="product-image">🍽️</div>
+                <div class="product-name">Combo Familiar</div>
                 <div class="product-price">$35.000 COP</div>
-                <div class="quantity-controls">
-                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
-                    <span class="quantity-display">0</span>
-                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                <div class="quantity-control">
+                    <button class="quantity-btn minus" data-product="combo_familiar">-</button>
+                    <span class="quantity-display" data-product="combo_familiar">0</span>
+                    <button class="quantity-btn plus" data-product="combo_familiar">+</button>
                 </div>
-                <button class="add-to-cart" onclick="addToCart('Combo Familiar', 35000, this)">Agregar al Carrito</button>
+                <button class="add-to-cart-btn" data-product="combo_familiar">Agregar al Carrito</button>
             </div>
 
-            <div class="product-card">
-                <h3 class="product-name">Alitas BBQ</h3>
+            <div class="product-card" data-product="alitas">
+                <div class="product-image">🍗</div>
+                <div class="product-name">Alitas BBQ</div>
                 <div class="product-price">$18.000 COP</div>
-                <div class="quantity-controls">
-                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
-                    <span class="quantity-display">0</span>
-                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                <div class="quantity-control">
+                    <button class="quantity-btn minus" data-product="alitas">-</button>
+                    <span class="quantity-display" data-product="alitas">0</span>
+                    <button class="quantity-btn plus" data-product="alitas">+</button>
                 </div>
-                <button class="add-to-cart" onclick="addToCart('Alitas BBQ', 18000, this)">Agregar al Carrito</button>
+                <button class="add-to-cart-btn" data-product="alitas">Agregar al Carrito</button>
             </div>
 
-            <div class="product-card">
-                <h3 class="product-name">Perro Caliente Especial</h3>
+            <div class="product-card" data-product="perro_caliente">
+                <div class="product-image">🌭</div>
+                <div class="product-name">Perro Caliente Especial</div>
                 <div class="product-price">$10.000 COP</div>
-                <div class="quantity-controls">
-                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
-                    <span class="quantity-display">0</span>
-                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                <div class="quantity-control">
+                    <button class="quantity-btn minus" data-product="perro_caliente">-</button>
+                    <span class="quantity-display" data-product="perro_caliente">0</span>
+                    <button class="quantity-btn plus" data-product="perro_caliente">+</button>
                 </div>
-                <button class="add-to-cart" onclick="addToCart('Perro Caliente Especial', 10000, this)">Agregar al Carrito</button>
+                <button class="add-to-cart-btn" data-product="perro_caliente">Agregar al Carrito</button>
             </div>
 
-            <div class="product-card">
-                <h3 class="product-name">Combo Pareja</h3>
+            <div class="product-card" data-product="combo_pareja">
+                <div class="product-image">💕</div>
+                <div class="product-name">Combo Pareja</div>
                 <div class="product-price">$25.000 COP</div>
-                <div class="quantity-controls">
-                    <button class="quantity-btn minus" onclick="updateQuantity(this, -1)">−</button>
-                    <span class="quantity-display">0</span>
-                    <button class="quantity-btn plus" onclick="updateQuantity(this, 1)">+</button>
+                <div class="quantity-control">
+                    <button class="quantity-btn minus" data-product="combo_pareja">-</button>
+                    <span class="quantity-display" data-product="combo_pareja">0</span>
+                    <button class="quantity-btn plus" data-product="combo_pareja">+</button>
                 </div>
-                <button class="add-to-cart" onclick="addToCart('Combo Pareja', 25000, this)">Agregar al Carrito</button>
+                <button class="add-to-cart-btn" data-product="combo_pareja">Agregar al Carrito</button>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Cart Badge -->
-    <div class="cart-badge empty" id="cartBadge" onclick="scrollToCart()">0</div>
-
-    <!-- Cart Section -->
-    <section class="cart-section" id="cartSection" style="display: none;">
-        <div class="cart-container">
-            <h2 class="cart-title">🛒 Tu Pedido</h2>
-            <div class="cart-items" id="cartItems"></div>
-            <div class="cart-total" id="cartTotal" style="display: none;">
-                Total: $0 COP
+    <!-- Cart Summary -->
+    <div class="cart-summary" id="cartSummary">
+        <div class="cart-content">
+            <div class="cart-info">
+                <div class="cart-badge" id="cartBadge">0</div>
+                <div class="cart-total" id="cartTotal">Total: $0 COP</div>
             </div>
-            <!-- Reemplaza la sección customer-info en tu HTML -->
-            <div class="customer-info" id="customerInfo" style="display: none;">
-                <div class="form-group">
-                    <label for="customerName">Nombre Completo: *</label>
-                    <input type="text" id="customerName" placeholder="Tu nombre completo" required>
-                </div>
-                <div class="form-group">
-                    <label for="customerPhone">Teléfono: *</label>
-                    <input type="tel" id="customerPhone" placeholder="Ej: 3001234567" required>
-                </div>
-                <div class="form-group">
-                    <label for="customerEmail">Correo Electrónico: *</label>
-                    <input type="email" id="customerEmail" placeholder="tu@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="customerAddress">Dirección: *</label>
-                    <input type="text" id="customerAddress" placeholder="Dirección de entrega" required>
-                </div>
-                <div class="form-group">
-                    <label for="customerNotes">Notas especiales:</label>
-                    <input type="text" id="customerNotes" placeholder="Alguna petición especial">
-                </div>
-            </div>
-            <button class="pay-button" id="payButton" onclick="showPaymentModal()" style="display: none;">
-                💳 PAGAR
-            </button>
-        </div>
-    </section>
-
-    <!-- Delivery Section -->
-    <section class="delivery-section">
-        <div class="delivery-container">
-            <div class="delivery-icon">🛵</div>
-            <div class="delivery-content">
-                <h2 class="delivery-title">Entregamos a Domicilio</h2>
-                <p class="delivery-description">Solo Cúcuriano lo que más pides, literal. Cero recargados. Por qué somos los mejores y entrega cáliente tu pedido para que disfrutes.</p>
+            <div class="cart-actions">
+                <button class="btn-secondary" onclick="clearCart()">Limpiar</button>
+                <button class="btn-primary" onclick="showCheckoutModal()">Pagar</button>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-contacts">
-            <a href="https://wa.me/573213700248" class="footer-contact">💬 WhatsApp</a>
-            <a href="tel:+573213700248" class="footer-contact">📞 Llámanos</a>
-            <a href="#" class="footer-contact">📋 Llámanos</a>
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🛒 Confirmar Pedido</h2>
+                <span class="close" onclick="closeCheckoutModal()">&times;</span>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            
+            <div class="order-summary">
+                <h3>Resumen del Pedido:</h3>
+                <div id="orderDetails"></div>
+                <div class="order-total" id="modalTotal"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="customerName">Nombre Completo: *</label>
+                <input type="text" id="customerName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerPhone">Teléfono: *</label>
+                <input type="tel" id="customerPhone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerEmail">Correo Electrónico: *</label>
+                <input type="email" id="customerEmail" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerAddress">Dirección: *</label>
+                <input type="text" id="customerAddress" required>
+            </div>
+
+            <div class="form-group">
+                <label for="specialNotes">Notas especiales:</label>
+                <textarea id="specialNotes" placeholder="Instrucciones especiales para tu pedido..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn-secondary" onclick="closeCheckoutModal()">Cancelar</button>
+                <button class="btn-primary" onclick="processPayment()" id="payButton">💳 Confirmar Pedido</button>
+            </div>
         </div>
-    </footer>
+    </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Datos de productos
+        const products = {
+            salchipapa: { name: 'Salchipapa Especial', price: 12000 },
+            hamburguesa: { name: 'Hamburguesa La Mona', price: 15000 },
+            combo_familiar: { name: 'Combo Familiar', price: 35000 },
+            alitas: { name: 'Alitas BBQ', price: 18000 },
+            perro_caliente: { name: 'Perro Caliente Especial', price: 10000 },
+            combo_pareja: { name: 'Combo Pareja', price: 25000 }
+        };
+
+        // Estado del carrito
+        let cart = {};
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updateCartDisplay();
+        });
+
+        function setupEventListeners() {
+            // Botones de cantidad
+            document.querySelectorAll('.quantity-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.dataset.product;
+                    const isPlus = this.classList.contains('plus');
+                    
+                    if (isPlus) {
+                        increaseQuantity(productId);
+                    } else {
+                        decreaseQuantity(productId);
+                    }
+                });
+            });
+
+            // Botones agregar al carrito
+            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.dataset.product;
+                    addToCart(productId);
+                });
+            });
+        }
+
+        function increaseQuantity(productId) {
+            const display = document.querySelector(`[data-product="${productId}"].quantity-display`);
+            let quantity = parseInt(display.textContent) + 1;
+            display.textContent = quantity;
+            
+            // Auto-agregar al carrito cuando la cantidad es >= 1
+            if (quantity >= 1) {
+                cart[productId] = quantity;
+                updateCartDisplay();
+            }
+        }
+
+        function decreaseQuantity(productId) {
+            const display = document.querySelector(`[data-product="${productId}"].quantity-display`);
+            let quantity = Math.max(0, parseInt(display.textContent) - 1);
+            display.textContent = quantity;
+            
+            if (quantity === 0) {
+                delete cart[productId];
+            } else {
+                cart[productId] = quantity;
+            }
+            updateCartDisplay();
+        }
+
+        function addToCart(productId) {
+            const display = document.querySelector(`[data-product="${productId}"].quantity-display`);
+            const quantity = parseInt(display.textContent);
+            
+            if (quantity > 0) {
+                cart[productId] = quantity;
+                updateCartDisplay();
+                showSuccessAnimation(productId);
+            }
+        }
+
+        function showSuccessAnimation(productId) {
+            const btn = document.querySelector(`[data-product="${productId}"].add-to-cart-btn`);
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Agregado';
+            btn.style.background = '#28a745';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '#ffc107';
+            }, 1000);
+        }
+
+        function updateCartDisplay() {
+            const cartSummary = document.getElementById('cartSummary');
+            const cartBadge = document.getElementById('cartBadge');
+            const cartTotal = document.getElementById('cartTotal');
+            
+            let totalItems = 0;
+            let totalPrice = 0;
+            
+            Object.keys(cart).forEach(productId => {
+                const quantity = cart[productId];
+                const price = products[productId].price;
+                totalItems += quantity;
+                totalPrice += quantity * price;
+            });
+            
+            cartBadge.textContent = totalItems;
+            cartTotal.textContent = `Total: $${totalPrice.toLocaleString()} COP`;
+            
+            if (totalItems > 0) {
+                cartSummary.classList.add('active');
+            } else {
+                cartSummary.classList.remove('active');
+            }
+        }
+
+        function clearCart() {
+            cart = {};
+            // Resetear todas las cantidades en pantalla
+            document.querySelectorAll('.quantity-display').forEach(display => {
+                display.textContent = '0';
+            });
+            updateCartDisplay();
+        }
+
+        function showCheckoutModal() {
+            if (Object.keys(cart).length === 0) {
+                alert('Tu carrito está vacío');
+                return;
+            }
+            
+            const modal = document.getElementById('checkoutModal');
+            const orderDetails = document.getElementById('orderDetails');
+            const modalTotal = document.getElementById('modalTotal');
+            
+            // Generar resumen del pedido
+            let html = '';
+            let total = 0;
+            
+            Object.keys(cart).forEach(productId => {
+                const product = products[productId];
+                const quantity = cart[productId];
+                const subtotal = product.price * quantity;
+                total += subtotal;
+                
+                html += `
+                    <div class="order-item">
+                        <span>${product.name} x${quantity}</span>
+                        <span>$${subtotal.toLocaleString()} COP</span>
+                    </div>
+                `;
+            });
+            
+            orderDetails.innerHTML = html;
+            modalTotal.textContent = `Total: $${total.toLocaleString()} COP`;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeCheckoutModal() {
+            const modal = document.getElementById('checkoutModal');
+            modal.style.display = 'none';
+            clearMessages();
+        }
+
+        function clearMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successEl = document.getElementById('successMessage');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        async function processPayment() {
+            clearMessages();
+            
+            // Validar formulario
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const email = document.getElementById('customerEmail').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            const notes = document.getElementById('specialNotes').value.trim();
+            
+            if (!name || !phone || !email || !address) {
+                showError('Por favor completa todos los campos obligatorios');
+                return;
+            }
+            
+            // Crear objeto del pedido
+            const orderData = {
+                cliente_nombre: name,
+                cliente_telefono: phone,
+                cliente_email: email,
+                cliente_direccion: address,
+                notas_especiales: notes,
+                items: Object.keys(cart).map(productId => ({
+                    producto: products[productId].name,
+                    cantidad: cart[productId],
+                    precio_unitario: products[productId].price,
+                    subtotal: cart[productId] * products[productId].price
+                })),
+                total: Object.keys(cart).reduce((sum, productId) => 
+                    sum + (cart[productId] * products[productId].price), 0
+                ),
+                fecha: new Date().toISOString()
+            };
+            
+            // Deshabilitar botón durante el proceso
+            const payButton = document.getElementById('payButton');
+            const originalText = payButton.textContent;
+            payButton.disabled = true;
+            payButton.textContent = 'Procesando...';
+            
+            try {
+                console.log('Enviando pedido:', orderData);
+                
+                // Intentar enviar a la API
+                const response = await fetch('/api/pedidos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showSuccess('¡Pedido enviado exitosamente! Te contactaremos pronto.');
+                    setTimeout(() => {
+                        clearCart();
+                        closeCheckoutModal();
+                    }, 2000);
+                } else {
+                    throw new Error(`Error del servidor: ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('Error al procesar el pedido:', error);
+                
+                // Fallback: redirigir a WhatsApp
+                const whatsappMessage = createWhatsAppMessage(orderData);
+                const whatsappUrl = `https://wa.me/573210000000?text=${encodeURIComponent(whatsappMessage)}`;
+                
+                showError('Error en el sistema. Redirigiendo a WhatsApp...');
+                setTimeout(() => {
+                    window.open(whatsappUrl, '_blank');
+                    clearCart();
+                    closeCheckoutModal();
+                }, 2000);
+            }
+            
+            // Rehabilitar botón
+            payButton.disabled = false;
+            payButton.textContent = originalText;
+        }
+
+        function createWhatsAppMessage(orderData) {
+            let message = `🍽️ *NUEVO PEDIDO - LA MONA PIQUETEADERO*\n\n`;
+            message += `👤 *Cliente:* ${orderData.cliente_nombre}\n`;
+            message += `📱 *Teléfono:* ${orderData.cliente_telefono}\n`;
+            message += `📧 *Email:* ${orderData.cliente_email}\n`;
+            message += `📍 *Dirección:* ${orderData.cliente_direccion}\n\n`;
+            
+            message += `📋 *PRODUCTOS:*\n`;
+            orderData.items.forEach(item => {
+                message += `• ${item.producto} x${item.cantidad} - $${item.subtotal.toLocaleString()} COP\n`;
+            });
+            
+            message += `\n💰 *TOTAL: $${orderData.total.toLocaleString()} COP*\n`;
+            
+            if (orderData.notas_especiales) {
+                message += `\n📝 *Notas especiales:* ${orderData.notas_especiales}\n`;
+            }
+            
+            message += `\n⏰ *Fecha:* ${new Date().toLocaleString('es-CO')}`;
+            
+            return message;
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('checkoutModal');
+            if (event.target == modal) {
+                closeCheckoutModal();
+            }
+        }
+    </script>
 </body>
 </html>
 <!-- Google Analytics -->
