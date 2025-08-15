@@ -1,6 +1,6 @@
 let cart = [];
 const WHATSAPP_NUMBER = '573213700248';
-const WEBHOOK_URL = 'https://la-mona-proxy-shrill-dew-f9c0.alexa9001.workers.dev'; // nuevo proxy
+const WEBHOOK_URL = 'https://la-mona-proxy-shrill-dew-f9c0.alexa9001.workers.dev/api/pedidos'; // nuevo proxy
 
 
 // Funciones principales (resto igual que antes)
