@@ -1698,8 +1698,15 @@ ${orderData.items.map(item => `• ${item.cantidad}x ${item.nombre} - ${(item.ca
 
 ${orderData.error_backup ? '⚠️ *Enviado como respaldo por error de conexión*' : '✅ *Pedido procesado automáticamente*'}`;
 
-            const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
-            window.open(whatsappURL, '_blank');
+            const appURL = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(mensaje)}`;
+            const webURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
+            
+            // Detectar si es móvil
+            if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                window.location.href = appURL;   // móvil → abre la app
+            } else {
+                window.open(webURL, '_blank');   // PC → abre WhatsApp Web
+            }
         }
 
         // Event listeners y inicialización
