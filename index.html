@@ -720,38 +720,82 @@
             }
         }
 
-        function redirectToWhatsAppPayment(orderData) {
-            let mensaje = `🍽️ *PEDIDO - LA MONA PIQUETEADERO*\n\n`;
-            
-            if (orderData.pedido_id) {
-                mensaje += `📋 *ID:* ${orderData.pedido_id}\n`;
-            }
-            
-            mensaje += `👤 *Cliente:* ${orderData.cliente_nombre}\n`;
-            mensaje += `📱 *Teléfono:* ${orderData.cliente_telefono}\n`;
-            mensaje += `📧 *Email:* ${orderData.cliente_email}\n`;
-            mensaje += `📍 *Dirección:* ${orderData.cliente_direccion}\n\n`;
-            
-            mensaje += `🛒 *PRODUCTOS:*\n`;
-            orderData.items.forEach(item => {
-                const itemTotal = item.cantidad * item.precio;
-                mensaje += `• ${item.cantidad}x ${item.nombre} - $${itemTotal.toLocaleString()}\n`;
-            });
-            
-            mensaje += `\n💰 *TOTAL: $${orderData.total.toLocaleString()} COP*\n\n`;
-            
-            if (orderData.notas && orderData.notas !== 'Sin notas especiales') {
-                mensaje += `📝 *Notas:* ${orderData.notas}\n\n`;
-            }
-            
-            mensaje += `🙏 *Por favor envíame el link de pago para confirmar mi pedido*\n\n`;
-            mensaje += `⏰ ${new Date().toLocaleString('es-CO')}`;
+        // Función principal de pago - ACTUALIZADA
+async function processPayment() {
+    closeModal();
 
-            const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
+    const customerName = document.getElementById('customerName').value.trim();
+    const customerPhone = document.getElementById('customerPhone').value.trim();
+    const customerEmail = document.getElementById('customerEmail').value.trim();
+    const customerAddress = document.getElementById('customerAddress').value.trim();
+    const customerNotes = document.getElementById('customerNotes').value.trim();
+
+    const total = cart.reduce((sum, item) => sum + item.total, 0);
+
+    const orderData = {
+        cliente_nombre: customerName,
+        cliente_telefono: customerPhone,
+        cliente_email: customerEmail,
+        cliente_direccion: customerAddress,
+        items: cart.map(item => ({
+            nombre: item.producto,
+            cantidad: item.cantidad,
+            precio: item.precio
+        })),
+        notas: customerNotes || 'Sin notas especiales',
+        total: total
+    };
+
+    const payBtn = document.getElementById('payButton');
+    const originalText = payBtn.textContent;
+    payBtn.disabled = true;
+    payBtn.textContent = '📤 Enviando pedido...';
+    payBtn.style.opacity = '0.6';
+
+    console.log('🚀 Enviando pedido:', orderData);
+
+    try {
+        const resultado = await hacerPedidoProxy(orderData);
+        
+        if (resultado.success) {
+            console.log('✅ Pedido enviado exitosamente');
             
-            console.log('📗 Abriendo WhatsApp...');
-            window.open(whatsappURL, '_blank');
+            // Mostrar mensaje de éxito primero
+            showSuccessMessage(resultado.pedido_id);
+            
+            // Esperar un momento antes de redirigir
+            setTimeout(() => {
+                redirectToWhatsAppPayment({
+                    ...orderData,
+                    pedido_id: resultado.pedido_id
+                });
+            }, 1500);
+            
+        } else {
+            console.error('❌ Error:', resultado.message);
+            alert('❌ Error procesando el pedido\n\n📱 Te redirigiremos a WhatsApp');
+            
+            redirectToWhatsAppPayment({
+                ...orderData,
+                error_backup: true
+            });
         }
+        
+    } catch (error) {
+        console.error('❌ Error crítico:', error);
+        alert('⚠️ Error de conexión\n\n📱 Redirigiendo a WhatsApp');
+        
+        redirectToWhatsAppPayment({
+            ...orderData,
+            error_backup: true
+        });
+        
+    } finally {
+        payBtn.disabled = false;
+        payBtn.textContent = originalText;
+        payBtn.style.opacity = '1';
+    }
+}
 
         function showSuccessMessage(pedidoId) {
             const overlay = document.createElement('div');
