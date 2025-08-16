@@ -1,5 +1,4 @@
-
-        * {
+* {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -863,7 +862,6 @@
                 overflow-x: auto;
                 padding-bottom: 10px;
             }
-
             .category-tab {
                 flex-shrink: 0;
             }
