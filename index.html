@@ -901,13 +901,18 @@
         <div class="benefits-grid">
             <div class="benefit-card">
                 <div class="benefit-icon">🍽️</div>
-                <h3>Servimos en Grande</h3>
-                <p>Nos gusta satisfacer el apetito para aquellos que les encanta la comida Colombiana.</p>
+                <h3>Reserva con anticipacion</h3>
+                <p>Preparamos para tus eventos y reuniones, solo contactanos y dinos lo que quieres.</p>
             </div>
             <div class="benefit-card">
                 <div class="benefit-icon">💳</div>
                 <h3>Facilidad de Pago</h3>
                 <p>Recibe el domicilio y paga por el medio que prefieras, efectivo o transferencia.</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">🍽️</div>
+                <h3>Servimos en Grande</h3>
+                <p>Nos gusta satisfacer el apetito para aquellos que les encanta la comida Colombiana.</p>
             </div>
         </div>
     </div>
@@ -916,8 +921,8 @@
     <section class="hero-section">
         <div class="hero-content">
             <div class="hero-text">
-                <h1>LA MONA<br>Piqueteadero</h1>
-                <h2>Entregamos a Domicilio</h2>
+                <h1>LA MONA<br>Piqueteadero Cocina Oculta</h1>
+                <h2>Trabajamos solo a Domicilio</h2>
                 <p>Solo Cocinamos lo que nos piden, Literal: CERO recalentado. Por ello somos los mejores y enviamos calientito tu pedido para que disfrutes.</p>
                 <a href="#productos" class="cta-button">ORDENA YA 🛵</a>
             </div>
@@ -939,16 +944,15 @@
             <div class="category-tabs">
                 <div class="category-tab active" onclick="filterCategory('all')">Todo</div>
                 <div class="category-tab" onclick="filterCategory('combos')">Combos</div>
-                <div class="category-tab" onclick="filterCategory('hamburguesas')">Hamburguesas</div>
                 <div class="category-tab" onclick="filterCategory('piqueteadero')">Piqueteadero</div>
-                <div class="category-tab" onclick="filterCategory('alitas')">Alitas</div>
+                <div class="category-tab" onclick="filterCategory('alitas')">Gallina</div>
             </div>
         </div>
 
         <!-- Products Grid -->
         <div class="products-grid">
             <!-- Salchipapa -->
-            <div class="product-card" data-category="piqueteadero" data-product="Salchipapa Especial">
+            <div class="product-card" data-category="piqueteadero" data-product="Picada Especial">
                 <div class="product-image">
                     <div class="photo-selector">
                         <div class="photo-options">
@@ -956,47 +960,19 @@
                             <div class="photo-option" onclick="selectPhoto(this, 'images/placeholder.jpg')">2</div>
                         </div>
                     </div>
-                    <img src="images/placeholder.jpg" alt="Salchipapa Especial" onerror="this.onerror=null; this.src='images/placeholder.jpg';">
+                    <img src="images/placeholder.jpg" alt="Picada Especial" onerror="this.onerror=null; this.src='images/placeholder.jpg';">
                 </div>
                 <div class="product-info">
-                    <h3 class="product-name">Salchipapa Especial</h3>
-                    <p class="product-description">Deliciosa combinación de papas crujientes con salchicha, acompañada de salsas especiales</p>
-                    <div class="product-price">$12.000 COP</div>
+                    <h3 class="product-name">Picada Especial x 6</h3>
+                    <p class="product-description">Deliciosa combinación de papas, rellena, chorizo, platano, buche, y costilla de cerdo</p>
+                    <div class="product-price">$100.000 COP</div>
                     <div class="product-actions">
                         <div class="quantity-control">
                             <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
                             <span class="quantity-display">0</span>
                             <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
                         </div>
-                        <button class="add-to-cart" onclick="addToCart('Salchipapa Especial', 12000, this)">
-                            Agregar
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hamburguesa -->
-            <div class="product-card" data-category="hamburguesas" data-product="Hamburguesa La Mona">
-                <div class="product-image">
-                    <div class="photo-selector">
-                        <div class="photo-options">
-                            <div class="photo-option active" onclick="selectPhoto(this, 'images/hamburguesa1.jpg')">1</div>
-                            <div class="photo-option" onclick="selectPhoto(this, 'images/hamburguesa2.jpg')">2</div>
-                        </div>
-                    </div>
-                    <img src="images/hamburguesa1.jpg" alt="Hamburguesa La Mona" onerror="this.onerror=null; this.src='images/placeholder.jpg';">
-                </div>
-                <div class="product-info">
-                    <h3 class="product-name">Hamburguesa La Mona</h3>
-                    <p class="product-description">Hamburguesa artesanal con carne jugosa, vegetales frescos y nuestra salsa especial</p>
-                    <div class="product-price">$15.000 COP</div>
-                    <div class="product-actions">
-                        <div class="quantity-control">
-                            <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
-                            <span class="quantity-display">0</span>
-                            <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
-                        </div>
-                        <button class="add-to-cart" onclick="addToCart('Hamburguesa La Mona', 15000, this)">
+                        <button class="add-to-cart" onclick="addToCart('Picada Especial', 100000, this)">
                             Agregar
                         </button>
                     </div>
@@ -1004,7 +980,7 @@
             </div>
 
             <!-- Combo Familiar -->
-            <div class="product-card" data-category="combos" data-product="Combo Familiar">
+            <div class="product-card" data-category="combos" data-product="Combo para dos">
                 <div class="product-image">
                     <div class="photo-selector">
                         <div class="photo-options">
@@ -1015,16 +991,16 @@
                     <img src="images/combo_familiar1.jpg" alt="Combo Familiar" onerror="this.onerror=null; this.src='images/placeholder.jpg';">
                 </div>
                 <div class="product-info">
-                    <h3 class="product-name">Combo Familiar</h3>
-                    <p class="product-description">Perfecto para compartir: 2 hamburguesas, papas grandes, alitas y bebidas</p>
-                    <div class="product-price">$35.000 COP</div>
+                    <h3 class="product-name">Combo para dos</h3>
+                    <p class="product-description">Perfecto para compartir entre 2: rellena, papas, platano,longaniza y media porcion de Costilla de cerdo</p>
+                    <div class="product-price">$50.000 COP</div>
                     <div class="product-actions">
                         <div class="quantity-control">
                             <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
                             <span class="quantity-display">0</span>
                             <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
                         </div>
-                        <button class="add-to-cart" onclick="addToCart('Combo Familiar', 35000, this)">
+                        <button class="add-to-cart" onclick="addToCart('Combo para dos', 50000, this)">
                             Agregar
                         </button>
                     </div>
@@ -1032,7 +1008,7 @@
             </div>
 
             <!-- Alitas -->
-            <div class="product-card" data-category="alitas" data-product="Alitas BBQ">
+            <div class="product-card" data-category="alitas" data-product="Gallina">
                 <div class="product-image">
                     <div class="photo-selector">
                         <div class="photo-options">
@@ -1040,19 +1016,19 @@
                             <div class="photo-option" onclick="selectPhoto(this, 'images/alitas2.jpg')">2</div>
                         </div>
                     </div>
-                    <img src="images/alitas1.jpg" alt="Alitas BBQ" onerror="this.onerror=null; this.src='images/placeholder.jpg';">
+                    <img src="images/alitas1.jpg" alt="Gallina" onerror="this.onerror=null; this.src='images/placeholder.jpg';">
                 </div>
                 <div class="product-info">
-                    <h3 class="product-name">Alitas BBQ</h3>
-                    <p class="product-description">8 alitas jugosas bañadas en salsa BBQ casera, acompañadas de aderezo ranch</p>
-                    <div class="product-price">$18.000 COP</div>
+                    <h3 class="product-name">Gallina</h3>
+                    <p class="product-description">Gallina, acompanada de papa y yuca</p>
+                    <div class="product-price">$80.000 COP</div>
                     <div class="product-actions">
                         <div class="quantity-control">
                             <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
                             <span class="quantity-display">0</span>
                             <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
                         </div>
-                        <button class="add-to-cart" onclick="addToCart('Alitas BBQ', 18000, this)">
+                        <button class="add-to-cart" onclick="addToCart('Gallina', 80000, this)">
                             Agregar
                         </button>
                     </div>
@@ -1060,7 +1036,7 @@
             </div>
 
             <!-- Perro Caliente -->
-            <div class="product-card" data-category="piqueteadero" data-product="Perro Caliente Especial">
+            <div class="product-card" data-category="combos" data-product="Combo Personal">
                 <div class="product-image">
                     <div class="photo-selector">
                         <div class="photo-options">
@@ -1068,27 +1044,27 @@
                             <div class="photo-option" onclick="selectPhoto(this, 'images/perro2.jpg')">2</div>
                         </div>
                     </div>
-                    <img src="images/perro1.jpg" alt="Perro Caliente Especial" onerror="this.onerror=null; this.src='images/placeholder.jpg';">
+                    <img src="images/perro1.jpg" alt="Combo Personal" onerror="this.onerror=null; this.src='images/placeholder.jpg';">
                 </div>
                 <div class="product-info">
-                    <h3 class="product-name">Perro Caliente Especial</h3>
-                    <p class="product-description">Perro caliente con salchicha premium, queso, salsas y papitas crujientes</p>
-                    <div class="product-price">$10.000 COP</div>
+                    <h3 class="product-name">Combo Personal</h3>
+                    <p class="product-description">rellena, papas, platano,longaniza</p>
+                    <div class="product-price">$20.000 COP</div>
                     <div class="product-actions">
                         <div class="quantity-control">
                             <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
                             <span class="quantity-display">0</span>
                             <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
                         </div>
-                        <button class="add-to-cart" onclick="addToCart('Perro Caliente Especial', 10000, this)">
+                        <button class="add-to-cart" onclick="addToCart('Combo personal', 20000, this)">
                             Agregar
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Combo Pareja -->
-            <div class="product-card" data-category="combos" data-product="Combo Pareja">
+            <!-- Combo Parejas -->
+            <div class="product-card" data-category="combos" data-product="Combo felices los 4">
                 <div class="product-image">
                     <div class="photo-selector">
                         <div class="photo-options">
@@ -1099,16 +1075,16 @@
                     <img src="images/combo_pareja1.jpg" alt="Combo Pareja" onerror="this.onerror=null; this.src='images/placeholder.jpg';">
                 </div>
                 <div class="product-info">
-                    <h3 class="product-name">Combo Pareja</h3>
-                    <p class="product-description">Ideal para dos: 2 hamburguesas, papas medianas y 2 bebidas</p>
-                    <div class="product-price">$25.000 COP</div>
+                    <h3 class="product-name">Combo felices los 4</h3>
+                    <p class="product-description">Ideal dos x dos: rellena, papas, platano,longaniza y porcion de Costilla de cerdo</p>
+                    <div class="product-price">$80.000 COP</div>
                     <div class="product-actions">
                         <div class="quantity-control">
                             <button class="quantity-btn" onclick="updateQuantity(this, -1)">-</button>
                             <span class="quantity-display">0</span>
                             <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
                         </div>
-                        <button class="add-to-cart" onclick="addToCart('Combo Pareja', 25000, this)">
+                        <button class="add-to-cart" onclick="addToCart('Combo felices los 4', 80000, this)">
                             Agregar
                         </button>
                     </div>
@@ -1174,14 +1150,9 @@
             
             <div class="contact-grid">
                 <div class="contact-card">
-                    <div class="contact-icon phone">📞</div>
-                    <h4>Línea Fija</h4>
-                    <a href="tel:6015722034" class="contact-btn">601 572 2034</a>
-                </div>
-                <div class="contact-card">
                     <div class="contact-icon">💬</div>
                     <h4>WhatsApp</h4>
-                    <a href="https://wa.me/573213700248" class="contact-btn">Escríbenos</a>
+                    <a href="https://wa.me/3144282217" class="contact-btn">Escríbenos</a>
                 </div>
                 <div class="contact-card">
                     <div class="contact-icon phone">📱</div>
@@ -1193,7 +1164,6 @@
             <div style="border-top: 1px solid #666; padding-top: 20px; margin-top: 30px; text-align: left; color: #ccc;">
                 <p><strong>📍 Domicilios en Bogotá</strong></p>
                 <p><strong>👨‍🍳 Cocina oculta, atención para eventos</strong></p>
-                <p><strong>📞 Teléfono:</strong> 601 572 2034</p>
                 <p><strong>📱 Celular:</strong> 314 428 2217</p>
                 <p><strong>💬 WhatsApp:</strong> 311 478 0582</p>
             </div>
@@ -1203,7 +1173,7 @@
     <script>
         // Variables globales
         let cart = [];
-        const WHATSAPP_NUMBER = '573213700248';
+        const WHATSAPP_NUMBER = '3144282217';
         const WEBHOOK_URL = 'https://la-mona-proxy-shrill-dew-f9c0.alexa9001.workers.dev/api/pedidos';
 
         // Funciones principales
@@ -1455,10 +1425,10 @@
                     <h3>🍽️ Confirmar Pedido</h3>
                     <p><strong>${customerName}</strong>, tu pedido será procesado automáticamente:</p>
                     <ul style="text-align: left; margin: 20px 0; padding-left: 20px;">
-                        <li>📄 Se enviará a nuestro sistema</li>
-                        <li>💳 Recibirás link de pago por WhatsApp</li>
+                        <li>📄 Se enviará tu pedido a nuestro sistema</li>
+                        <li>💳 Serás redireccionado a WhatsApp para confirmar pago de tu pedido</li>
                         <li>📧 Confirmación por email</li>
-                        <li>🚚 Tiempo estimado: 30-45 minutos</li>
+                        <li>🚚 Tiempo estimado: 45 - 60 minutos</li>
                     </ul>
                     <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
                         <strong style="color: #28a745; font-size: 1.2em;">Total: ${total.toLocaleString()} COP</strong>
